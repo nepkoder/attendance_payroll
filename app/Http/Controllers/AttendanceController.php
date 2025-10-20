@@ -100,25 +100,43 @@ class AttendanceController extends Controller
       return response()->json(['error' => 'No active session found. Please mark in first.'], 400);
     }
 
+    // Get assigned mark-in location (with alias and lat/lng)
+    $employeeData = Employee::with('markOutLocation')->find($employee->id);
 
-    $location = Employee::with('markOutLocation')->find($employee->id);
+    // Get user current coordinates from mobile device
+    $userLat = floatval($request->latitude);
+    $userLng = floatval($request->longitude);
 
-    $outLat = $request->latitude ?? 0;
-    $outLng = $request->longitude ?? 0;
+    if ($employeeData && $employeeData->markOutLocation) {
 
-    if ($location && $location->markOutLocation) {
-      $outLat = $location->markOutLocation->latitude;
-      $outLng = $location->markOutLocation->longitude;
+      $location = $employeeData->markOutLocation;
+
+      // Get assigned location coordinates
+      $locLat = floatval($location->latitude);
+      $locLng = floatval($location->longitude);
+
+      // Calculate distance using Haversine formula
+      $distanceKm = $this->haversineKm($userLat, $userLng, $locLat, $locLng);
+
+      // Define radius (in km)
+      $allowedRadiusKm = 0.1; // 100 meters
+
+      if ($distanceKm > $allowedRadiusKm) {
+        return response()->json([
+          'error' => 'You are too far from the mark-out location (' . round($distanceKm * 1000) . ' meters away).',
+        ], 400);
+      }
     }
 
+
     $attendance->mark_out = now();
-    $attendance->out_latitude = $outLat ?? 0;
-    $attendance->out_longitude = $outLng ?? 0;
+    $attendance->out_latitude = $userLat ?? 0;
+    $attendance->out_longitude = $userLng ?? 0;
 
     // Calculate worked hours & earnings
     $hours = Carbon::parse($attendance->mark_in)->diffInMinutes($attendance->mark_out) / 60;
     $attendance->hour = number_format($hours, 2);
-    $attendance->earning = $hours * $employee->hourly_rate; // example: £100/hour
+    $attendance->earning = $hours * $attendance->hourly_rate;
     $attendance->save();
 
     return response()->json([
