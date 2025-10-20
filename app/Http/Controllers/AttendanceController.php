@@ -11,14 +11,15 @@ use Illuminate\Support\Facades\Auth;
 
 class AttendanceController extends Controller
 {
+  use Illuminate\Http\Request;
+  use Illuminate\Support\Facades\Auth;
+  use Carbon\Carbon;
+  use App\Models\Attendance;
+  use App\Models\Employee;
+
   public function markIn(Request $request)
   {
-
     $employee = Auth::guard('employee')->user();
-
-//    if ($employee->hourly_rate <= 0) {
-//      return response()->json(['error' => 'No Rate Found. Please update the hourly rate to continue.'], 400);
-//    }
 
     // Prevent duplicate mark-in without mark-out
     $existing = Attendance::where('employee_id', $employee->id)
@@ -29,28 +30,66 @@ class AttendanceController extends Controller
       return response()->json(['error' => 'Already marked in. Please mark out first.'], 400);
     }
 
-    $location = Employee::with('markInLocation')->find($employee->id);
+    // Get assigned mark-in location (with alias and lat/lng)
+    $employeeData = Employee::with('markInLocation')->find($employee->id);
 
-    $inLat = $request->latitude;
-    $inLng = $request->longitude;
+    // Get user current coordinates from mobile device
+    $userLat = floatval($request->latitude);
+    $userLng = floatval($request->longitude);
 
-    if ($location && $location->markInLocation) {
-      $inLat = $location->markInLocation->latitude;
-      $inLng = $location->markInLocation->longitude;
+    if ($employeeData && $employeeData->markInLocation) {
+
+      $location = $employeeData->markInLocation;
+
+      // Get assigned location coordinates
+      $locLat = floatval($location->latitude);
+      $locLng = floatval($location->longitude);
+
+      // Calculate distance using Haversine formula
+      $distanceKm = $this->haversineKm($userLat, $userLng, $locLat, $locLng);
+
+      // Define radius (in km)
+      $allowedRadiusKm = 0.1; // 100 meters
+
+      if ($distanceKm > $allowedRadiusKm) {
+        return response()->json([
+          'error' => 'You are too far from the mark-in location (' . round($distanceKm * 1000) . ' meters away).',
+        ], 400);
+      }
     }
 
+    // Proceed to mark in if within radius
     $attendance = Attendance::create([
       'employee_id' => $employee->id,
       'mark_in' => now(),
-      'in_latitude' => $inLat ?? 0,
-      'in_longitude' => $inLng ?? 0,
-      'hourly_rate' => $employee->hourly_rate
+      'in_latitude' => $userLat,
+      'in_longitude' => $userLng,
+      'hourly_rate' => $employee->hourly_rate,
     ]);
 
     return response()->json([
-      'message' => 'Marked in successfully.',
+      'message' => 'Marked in successfully at location: ' . $location->alias,
+      'distanceKm' => round($distanceKm, 3),
       'attendance' => $attendance,
     ]);
+  }
+
+  /**
+   * Calculate distance between two coordinates using Haversine formula.
+   */
+  private function haversineKm($lat1, $lon1, $lat2, $lon2)
+  {
+    $earthRadius = 6371; // km
+    $dLat = deg2rad($lat2 - $lat1);
+    $dLon = deg2rad($lon2 - $lon1);
+
+    $a = sin($dLat / 2) ** 2 +
+      cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
+      sin($dLon / 2) ** 2;
+
+    $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+    return $earthRadius * $c;
   }
 
   public function markOut(Request $request)
