@@ -3,4 +3,5 @@
 return [
     App\Providers\AppServiceProvider::class,
     App\Providers\MenuServiceProvider::class,
+  \LaravelPWA\Providers\LaravelPWAServiceProvider::class
 ];
