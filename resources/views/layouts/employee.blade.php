@@ -122,6 +122,7 @@
     }
 
   </style>
+  @laravelPWA
 </head>
 <body class="min-h-screen bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 text-slate-800">
 <div class="w-full">
