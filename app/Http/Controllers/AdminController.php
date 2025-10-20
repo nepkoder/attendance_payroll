@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Attendance;
 use App\Models\Employee;
 use Carbon\Carbon;
+use http\Client\Curl\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
@@ -19,11 +20,16 @@ class AdminController extends Controller
   public function login(Request $request)
   {
     $credentials = $request->validate([
-      'email' => ['required', 'email'],
+      'email' => ['required'],
       'password' => ['required'],
     ]);
 
-    if (Auth::guard('web')->attempt($credentials, $request->filled('remember'))) {
+    $user = User::where('username',$request->email)->value('email');
+
+    if (Auth::guard('web')->attempt([
+      'email' => $user,
+      'password' => $request->password
+    ], $request->filled('remember'))) {
       return redirect()->intended(route('admin.dashboard'));
     }
 
