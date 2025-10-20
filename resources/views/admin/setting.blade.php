@@ -13,20 +13,42 @@
       @if(session('success'))
         <div class="alert alert-success mt-2">{{ session('success') }}</div>
       @endif
-      <form action="{{ route('timezone.update') }}" method="POST">
+
+      <form action="{{ route('settings.update') }}" method="POST" class="space-y-4">
         @csrf
-        <label for="timezone">Select Timezone</label>
-        <select name="timezone" id="timezone" class="form-select" onchange="this.form.submit()">
-          @foreach(timezone_identifiers_list() as $tz)
-            <option value="{{ $tz }}" {{ config('app.timezone') == $tz ? 'selected' : '' }}>
-              {{ $tz }}
-            </option>
-          @endforeach
-        </select>
+
+        {{-- Timezone Selection --}}
+        <div class="mb-3">
+          <label for="timezone" class="form-label fw-semibold">Select Timezone</label>
+          <select name="timezone" id="timezone" class="form-select">
+            @foreach(timezone_identifiers_list() as $tz)
+              <option value="{{ $tz }}" {{ config('app.timezone') == $tz ? 'selected' : '' }}>
+                {{ $tz }}
+              </option>
+            @endforeach
+          </select>
+        </div>
+
+        {{-- Radius Coverage --}}
+        <div class="mb-3">
+          <label for="radius" class="form-label fw-semibold">Coverage Radius (in Meter)</label>
+          <input
+            type="number"
+            name="radius"
+            id="radius"
+            min="0"
+            max="10000"
+            class="form-control"
+            value="{{ old('radius', env('COVERAGE_RADIUS')) }}"
+            placeholder="Enter radius, e.g., 0.5"
+          >
+          <div class="form-text text-muted small">Define the maximum distance (in Meter) allowed for marking attendance.</div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save Settings</button>
       </form>
 
     </div>
-
 
   </div>
 @endsection

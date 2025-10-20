@@ -44,7 +44,7 @@ class AttendanceController extends Controller
       $distanceKm = $this->haversineKm($userLat, $userLng, $locLat, $locLng);
 
       // Define radius (in km)
-      $allowedRadiusKm = 0.1; // 100 meters
+      $allowedRadiusKm = env('COVERAGE_RADIUS') / 100;
 
       if ($distanceKm > $allowedRadiusKm) {
         return response()->json([
@@ -119,7 +119,7 @@ class AttendanceController extends Controller
       $distanceKm = $this->haversineKm($userLat, $userLng, $locLat, $locLng);
 
       // Define radius (in km)
-      $allowedRadiusKm = 0.1; // 100 meters
+      $allowedRadiusKm = env('COVERAGE_RADIUS') / 100;
 
       if ($distanceKm > $allowedRadiusKm) {
         return response()->json([

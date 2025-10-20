@@ -170,6 +170,7 @@ class EmployeeController extends Controller
 
     return view('employee.attendance', compact('report', 'totalHours', 'totalEarnings', 'totalDays', 'from', 'to'));
   }
+
   public function pdReport(Request $request)
   {
     // Default last 7 days
@@ -194,6 +195,7 @@ class EmployeeController extends Controller
 
     return view('employee.pdreport', compact('pickups', 'summary', 'from', 'to'));
   }
+
   public function earningsReport(Request $request)
   {
     $employeeId = Auth::guard('employee')->id();
@@ -232,7 +234,6 @@ class EmployeeController extends Controller
 
     return view('employee.earning', compact('records', 'fromDate', 'toDate'));
   }
-
 
 
   public function profileEdit()
@@ -320,8 +321,12 @@ class EmployeeController extends Controller
   // Employee Auth
   public function showLoginForm()
   {
+    if (Auth::guard('employee')->check()) {
+      return redirect()->route('employee.dashboard');
+    }
     return view('employee.login');
   }
+
   public function login(Request $request)
   {
     $request->validate([

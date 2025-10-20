@@ -6,6 +6,7 @@
   <title>Employee Dashboard — Pickup / Drop</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@v2.1.5/dist/tesseract.min.js"></script>
+  <link rel="icon" type="image/x-icon" href="{{ asset('assets/img/favicon/favicon.ico') }}" />
   <style>
     .nav-gradient-1 {
       background: linear-gradient(180deg, #3b82f6, #60a5fa);

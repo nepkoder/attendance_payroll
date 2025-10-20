@@ -15,6 +15,9 @@ class AdminController extends Controller
 {
   public function showLoginForm()
   {
+    if (Auth::guard('web')->check()) {
+      return redirect()->route('admin.dashboard');
+    }
     return view('admin.login');
   }
 
@@ -207,36 +210,32 @@ class AdminController extends Controller
     return view('admin.employee-summary', compact('employee', 'summary', 'filteredAttendances', 'filteredPickups', 'from', 'to'));
   }
 
-
-  public function updateTimezone(Request $request)
+  public function updateSetting(Request $request)
   {
     $request->validate([
-      'timezone' => 'required|in:' . implode(',', timezone_identifiers_list()),
+      'timezone' => 'required|string',
+      'radius' => 'required|numeric|min:10|max:1000',
     ]);
 
-    $timezone = $request->timezone;
+    // Update timezone in config or .env
+    $this->updateEnv('APP_TIMEZONE', $request->timezone);
 
-    $envPath = base_path('.env');
+    // Save radius setting (store in database or .env)
+    $this->updateEnv('COVERAGE_RADIUS', $request->radius);
 
-    if (File::exists($envPath)) {
-      $envContent = file_get_contents($envPath);
+    return back()->with('success', 'Settings updated successfully!');
+  }
 
-      // Replace APP_TIMEZONE if it exists
-      if (strpos($envContent, 'APP_TIMEZONE=') !== false) {
-        $envContent = preg_replace('/APP_TIMEZONE=.*/', 'APP_TIMEZONE=' . $timezone, $envContent);
-      } else {
-        // Append APP_TIMEZONE if not present
-        $envContent .= "\nAPP_TIMEZONE={$timezone}";
-      }
-
-      file_put_contents($envPath, $envContent);
+  private function updateEnv($key, $value)
+  {
+    $path = base_path('.env');
+    if (file_exists($path)) {
+      file_put_contents($path, preg_replace(
+        '/^' . $key . '=.*/m',
+        $key . '=' . $value,
+        file_get_contents($path)
+      ));
     }
-
-    // Update runtime config immediately
-    config(['app.timezone' => $timezone]);
-    date_default_timezone_set($timezone);
-
-    return back()->with('success', 'Application timezone updated to ' . $timezone);
   }
 
 
