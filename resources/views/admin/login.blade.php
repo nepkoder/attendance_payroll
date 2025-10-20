@@ -28,13 +28,13 @@
                     @csrf
 
                     <div class="mb-6">
-                      <label for="email" class="form-label">Email</label>
+                      <label for="username" class="form-label">Username</label>
                       <input
-                        type="email"
+                        type="text"
                         class="form-control"
-                        id="email"
-                        name="email"
-                        placeholder="Enter your email"
+                        id="username"
+                        name="username"
+                        placeholder="Enter your username"
                         required
                         autofocus
                       />

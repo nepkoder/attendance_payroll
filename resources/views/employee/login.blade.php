@@ -30,11 +30,11 @@
 
             <!-- Email or Username -->
               <div class="mb-3">
-                <label for="login" class="form-label">Email or Username</label>
-                <input type="text" class="form-control @error('email') is-invalid @enderror"
-                       id="login" name="email" placeholder="Enter your email or username" value="{{ old('email') }}"
+                <label for="login" class="form-label">Username</label>
+                <input type="text" class="form-control @error('username') is-invalid @enderror"
+                       id="login" name="username" placeholder="Enter your username" value="{{ old('username') }}"
                        autofocus/>
-                @error('email')
+                @error('username')
                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
                                 </span>

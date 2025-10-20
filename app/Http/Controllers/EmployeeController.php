@@ -317,31 +317,30 @@ class EmployeeController extends Controller
   {
     return view('employee.login');
   }
-
   public function login(Request $request)
   {
-    $credentials = $request->validate([
-      'email' => ['required'],
-      'password' => ['required'],
+    $request->validate([
+      'username' => 'required|string',
+      'password' => 'required|string',
     ]);
 
-    $user = Employee::where('username',$request->email)->value('email');
+    $credentials = $request->only('username', 'password');
 
-    if (Auth::guard('employee')->attempt([
-      'email' => $user,
-      'password' => $request->password
-    ])) {
+    if (Auth::guard('employee')->attempt($credentials, $request->filled('remember'))) {
       return redirect()->intended(route('employee.dashboard'));
     }
 
-    return back()->withErrors(['email' => 'Invalid credentials']);
+    return back()->withErrors([
+      'username' => 'Invalid username or password.',
+    ])->onlyInput('username');
   }
+
 
   public function logout(Request $request)
   {
     Auth::guard('employee')->logout();
-    $request->session()->invalidate();
-    $request->session()->regenerateToken();
+//    $request->session()->invalidate();
+//    $request->session()->regenerateToken();
     return redirect()->route('employee.login');
   }
 

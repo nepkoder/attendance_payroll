@@ -19,23 +19,21 @@ class AdminController extends Controller
 
   public function login(Request $request)
   {
-    $credentials = $request->validate([
-      'email' => ['required'],
-      'password' => ['required'],
+    $request->validate([
+      'username' => 'required|string',
+      'password' => 'required|string',
     ]);
 
-    $user = User::where('username',$request->email)->value('email');
+    $credentials = $request->only('username', 'password');
 
-    if (Auth::guard('web')->attempt([
-      'email' => $user,
-      'password' => $request->password
-    ], $request->filled('remember'))) {
+    // Attempt login using username instead of email
+    if (Auth::guard('web')->attempt($credentials, $request->filled('remember'))) {
       return redirect()->intended(route('admin.dashboard'));
     }
 
     return back()->withErrors([
-      'email' => 'Invalid email or password.',
-    ])->onlyInput('email');
+      'username' => 'Invalid username or password.',
+    ])->onlyInput('username');
   }
 
   public function logout(Request $request)
