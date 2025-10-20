@@ -46,7 +46,7 @@
               <img src="https://cdn-icons-png.flaticon.com/512/7486/7486797.png" alt="No Data" width="80" class="mb-3 opacity-75"><br>
               <h6>No locations found</h6>
               <small>Click “Add Location” to create a new one.</small><br>
-              <a href="{{ route('location.create') }}" class="btn btn-primary btn-sm mt-2">
+              <a href="{{ route('location.add') }}" class="btn btn-primary btn-sm mt-2">
                 + Add New Location
               </a>
             </td>
