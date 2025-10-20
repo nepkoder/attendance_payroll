@@ -9,7 +9,7 @@ use App\Http\Middleware\GuardAuth;
 use Illuminate\Support\Facades\Route;
 
 // Main Page Route
-//Route::get('/', [Analytics::class, 'index'])->name('dashboard-analytics');
+Route::get('/', [AdminController::class, 'showLoginForm'])->name('login');
 
 // Admin
 Route::prefix('admin')->group(function () {
