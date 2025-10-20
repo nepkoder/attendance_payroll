@@ -14,9 +14,9 @@ class AttendanceController extends Controller
 
     $employee = Auth::guard('employee')->user();
 
-    if ($employee->hourly_rate <= 0) {
-      return response()->json(['error' => 'No Rate Found. Please update the hourly rate to continue.'], 400);
-    }
+//    if ($employee->hourly_rate <= 0) {
+//      return response()->json(['error' => 'No Rate Found. Please update the hourly rate to continue.'], 400);
+//    }
 
     // Prevent duplicate mark-in without mark-out
     $existing = Attendance::where('employee_id', $employee->id)

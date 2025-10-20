@@ -122,76 +122,62 @@ class EmployeeController extends Controller
 
   public function attendanceReport(Request $request)
   {
-    $userId = Auth::id();
-    $view = $request->query('view', 'daily'); // default daily
+    $userId = Auth::guard('employee')->id();
+
+    // Get from/to dates from request or default to last 7 days
+    $from = $request->query('from') ? Carbon::parse($request->query('from'))->startOfDay() : Carbon::now()->subDays(7)->startOfDay();
+    $to = $request->query('to') ? Carbon::parse($request->query('to'))->endOfDay() : Carbon::now()->endOfDay();
+
+    // Fetch attendances within range
+    $attendances = Attendance::where('employee_id', $userId)
+      ->whereBetween('mark_in', [$from, $to])
+      ->orderBy('mark_in')
+      ->get();
+
+    // Group attendances by date
+    $dailyAttendances = $attendances->groupBy(function ($a) {
+      return $a->mark_in->format('Y-m-d');
+    });
 
     $report = [];
 
-    if ($view === 'weekly') {
-      // Last 4 weeks
-      $startDate = Carbon::now()->subWeeks(4)->startOfWeek();
-      $endDate = Carbon::now()->endOfWeek();
+    foreach ($dailyAttendances as $date => $items) {
+      $totalHours = $items->sum('hour');
+      $totalEarnings = $items->sum('earning');
+      $firstIn = $items->min('mark_in')?->format('H:i') ?? '-';
+      $lastOut = $items->max('mark_out')?->format('H:i') ?? '-';
 
-      $period = CarbonPeriod::create($startDate, '1 week', $endDate);
-
-      foreach ($period as $week) {
-        $weekStart = $week->copy()->startOfWeek();
-        $weekEnd = $week->copy()->endOfWeek();
-
-        $attendances = Attendance::where('employee_id', $userId)
-          ->whereBetween('mark_in', [$weekStart, $weekEnd])
-          ->get();
-
-        $totalHours = $attendances->sum('hour');
-        $totalEarnings = $attendances->sum('earning');
-
-        $report[] = [
-          'label' => $weekStart->format('Y-m-d') . ' to ' . $weekEnd->format('Y-m-d'),
-          'in' => $attendances->min('mark_in')?->format('H:i') ?? '-',
-          'out' => $attendances->max('mark_out')?->format('H:i') ?? '-',
-          'hours' => $totalHours,
-          'earnings' => $totalEarnings,
-          'deductions' => 0,
-        ];
-      }
-
-    } else {
-      // Daily report
-      $attendances = Attendance::where('employee_id', $userId)
-        ->orderBy('mark_in', 'desc')
-        ->get();
-
-      $report = $attendances->map(function ($a) {
-        return [
-          'label' => $a->mark_in ? $a->mark_in->format('Y-m-d') : '-',
-          'in' => $a->mark_in ? $a->mark_in->format('H:i') : '-',
-          'out' => $a->mark_out ? $a->mark_out->format('H:i') : '-',
-          'hours' => $a->hour ?? 0,
-          'earnings' => $a->earning ?? 0,
-          'deductions' => 0,
-        ];
-      })->toArray();
+      $report[] = [
+        'label' => $date,
+        'in' => $firstIn,
+        'out' => $lastOut,
+        'hours' => $totalHours,
+        'earnings' => $totalEarnings,
+        'deductions' => 0,
+        'days' => 1,
+      ];
     }
 
     // Totals
     $totalHours = array_sum(array_column($report, 'hours'));
     $totalEarnings = array_sum(array_column($report, 'earnings'));
+    $totalDays = array_sum(array_column($report, 'days'));
 
-    return view('employee.attendance', compact('report', 'view', 'totalHours', 'totalEarnings'));
+    return view('employee.attendance', compact('report', 'totalHours', 'totalEarnings', 'totalDays', 'from', 'to'));
   }
-
   public function pdReport(Request $request)
   {
-    $view = $request->query('view', 'daily'); // default daily
+    // Default last 7 days
+    $from = $request->query('from')
+      ? Carbon::parse($request->query('from'))->startOfDay()
+      : Carbon::now()->subDays(6)->startOfDay();
+    $to = $request->query('to')
+      ? Carbon::parse($request->query('to'))->endOfDay()
+      : Carbon::now()->endOfDay();
 
     $query = VehiclePickup::with('drop');
 
-    if ($view === 'daily') {
-      $query->whereDate('created_at', Carbon::today());
-    } elseif ($view === 'monthly') {
-      $query->whereMonth('created_at', Carbon::now()->month)
-        ->whereYear('created_at', Carbon::now()->year);
-    }
+    $query->whereBetween('created_at', [$from, $to]);
 
     $pickups = $query->latest()->get();
 
@@ -201,48 +187,48 @@ class EmployeeController extends Controller
       'total_drops' => $pickups->where('drop')->count(),
     ];
 
-    return view('employee.pdreport', compact('pickups', 'summary', 'view'));
+    return view('employee.pdreport', compact('pickups', 'summary', 'from', 'to'));
   }
-
   public function earningsReport(Request $request)
   {
-    $employeeId = Auth::id();
-    $view = $request->query('view', 'daily'); // default = daily
+    $employeeId = Auth::guard('employee')->id();
 
-    $query = Attendance::where('employee_id', $employeeId);
+    // Default last 7 days
+    $fromDate = $request->query('from')
+      ? Carbon::parse($request->query('from'))->startOfDay()
+      : Carbon::now()->subDays(6)->startOfDay();
+    $toDate = $request->query('to')
+      ? Carbon::parse($request->query('to'))->endOfDay()
+      : Carbon::now()->endOfDay();
 
-    if ($view == 'daily') {
-      $records = $query->select(
-        DB::raw('DATE(mark_in) as period'),
-        DB::raw('SUM(TIME_TO_SEC(hour))/3600 as total_hours'),
-        DB::raw('SUM(earning) as total_earnings'),
-        DB::raw('SUM(hour * hourly_rate - earning) as total_deductions')
-      )
-        ->groupBy('period')
-        ->orderBy('period', 'desc')
-        ->get();
-    } elseif ($view == 'monthly') {
-      $records = $query->select(
-        DB::raw('DATE_FORMAT(mark_in, "%Y-%m") as period'),
-        DB::raw('SUM(TIME_TO_SEC(hour))/3600 as total_hours'),
-        DB::raw('SUM(earning) as total_earnings'),
-        DB::raw('SUM(hour * hourly_rate - earning) as total_deductions')
-      )
-        ->groupBy('period')
-        ->orderBy('period', 'desc')
-        ->get();
-    } else {
-      // All records grouped by employee
-      $records = $query->select(
-        DB::raw('"All Time" as period'),
-        DB::raw('SUM(TIME_TO_SEC(hour))/3600 as total_hours'),
-        DB::raw('SUM(earning) as total_earnings'),
-        DB::raw('SUM(hour * hourly_rate - earning) as total_deductions')
-      )->get();
-    }
+    // Get attendances for the employee in the date range
+    $attendances = Attendance::where('employee_id', $employeeId)
+      ->whereBetween('mark_in', [$fromDate, $toDate])
+      ->orderBy('mark_in', 'asc')
+      ->get();
 
-    return view('employee.earning', compact('records', 'view'));
+    // Group attendances by date
+    $records = $attendances->groupBy(function ($item) {
+      return $item->mark_in->format('Y-m-d');
+    })->map(function ($dayAttendances, $date) {
+      $totalHours = $dayAttendances->sum('hour');
+      $totalEarnings = $dayAttendances->sum('earning');
+      $totalDeductions = $dayAttendances->sum(function ($a) {
+        return ($a->hour * $a->hourly_rate) - $a->earning;
+      });
+
+      return [
+        'period' => $date,
+        'total_hours' => $totalHours,
+        'total_earnings' => $totalEarnings,
+        'total_deductions' => $totalDeductions,
+      ];
+    });
+
+    return view('employee.earning', compact('records', 'fromDate', 'toDate'));
   }
+
+
 
   public function profileEdit()
   {
@@ -335,11 +321,16 @@ class EmployeeController extends Controller
   public function login(Request $request)
   {
     $credentials = $request->validate([
-      'email' => ['required', 'email'],
+      'email' => ['required'],
       'password' => ['required'],
     ]);
 
-    if (Auth::guard('employee')->attempt($credentials)) {
+    $user = Employee::where('username',$request->email)->value('email');
+
+    if (Auth::guard('employee')->attempt([
+      'email' => $user,
+      'password' => $request->password
+    ])) {
       return redirect()->intended(route('employee.dashboard'));
     }
 

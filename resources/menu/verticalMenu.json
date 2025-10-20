@@ -7,9 +7,6 @@
       "slug": "dashboard"
     },
     {
-      "menuHeader": "Masters"
-    },
-    {
       "name": "Employees",
       "icon": "menu-icon icon-base bx bx-dock-top",
       "slug": "admin/employee",
@@ -61,10 +58,6 @@
         }
       ]
     },
-
-    {
-      "menuHeader": "Reports"
-    },
     {
       "name": "Employee Report",
       "icon": "menu-icon icon-base bx bx-collection",
@@ -76,9 +69,6 @@
       "icon": "menu-icon icon-base bx bx-crown",
       "name": "Attenance Report",
       "slug": "icons-boxicons"
-    },
-    {
-      "menuHeader": "Others"
     },
     {
       "url": "admin/setting",

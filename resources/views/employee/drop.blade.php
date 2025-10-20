@@ -66,66 +66,54 @@
   </div>
 
   <!-- ✅ HISTORY TABLE -->
+  <!-- ✅ HISTORY TABLE (Drop Only) -->
   <section class="mt-8">
-    <h2 class="text-lg font-semibold mb-3">Pickup & Drop Records</h2>
+    <h2 class="text-lg font-semibold mb-3">Drop Records</h2>
 
     <div class="overflow-auto max-h-[60vh] rounded-xl border border-slate-200 shadow">
       <table class="w-full border text-sm">
         <thead class="bg-slate-200">
         <tr>
           <th class="p-2 border text-start">Vehicle No</th>
-          <th class="p-2 border text-start">Pickup Time</th>
           <th class="p-2 border text-start">Drop Time</th>
-          <th class="p-2 border text-start">Remarks</th>
-          <th class="p-2 border text-center">Status</th>
+          <th class="p-2 border text-start">Drop Remarks</th>
           <th class="p-2 border text-center">Images</th>
+          <th class="p-2 border text-center">Status</th>
         </tr>
         </thead>
         <tbody>
-        @forelse($pickups as $pickup)
+        @forelse($pickups->filter(fn($p) => $p->drop) as $pickup)
           <tr class="align-top hover:bg-slate-50">
             <td class="border p-2 font-semibold">{{ $pickup->vehicle_number }}</td>
-            <td class="border p-2">{{ $pickup->created_at->format('Y-m-d H:i') }}</td>
-            <td class="border p-2">
-              {{ $pickup->drop ? $pickup->drop->created_at->format('Y-m-d H:i') : '-' }}
-            </td>
-            <td class="border p-2 text-slate-700">{{ $pickup->remarks ?? '-' }}</td>
-
-            <td class="border p-2 text-center">
-              @if($pickup->drop)
-                <span class="text-green-600 font-semibold">Dropped</span>
-              @else
-                <span class="text-amber-600 font-semibold">Pending</span>
-              @endif
-            </td>
+            <td class="border p-2">{{ $pickup->drop->created_at->format('Y-m-d H:i') }}</td>
+            <td class="border p-2 text-slate-700">{{ $pickup->drop->remarks ?? '-' }}</td>
 
             <td class="border p-2 text-center">
               @php
-                $pickupImages = array_filter(array_merge(
-                  $pickup->camera_image ? [$pickup->camera_image] : [],
-                  $pickup->images ?? []
-                ));
                 $dropImages = array_filter(array_merge(
-                  $pickup->drop?->camera_image ? [$pickup->drop->camera_image] : [],
-                  $pickup->drop?->images ?? []
+                    $pickup->drop->camera_image ? [$pickup->drop->camera_image] : [],
+                    $pickup->drop->images ?? []
                 ));
-                $allImages = array_merge($pickupImages, $dropImages);
               @endphp
 
-              @if(count($allImages) > 0)
+              @if(count($dropImages) > 0)
                 <button
-                  class="px-3 py-1 bg-indigo-500 text-white rounded hover:bg-indigo-600 text-xs"
-                  onclick="openImageModal({{ json_encode($allImages) }})">
+                  class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-xs"
+                  onclick="openImageModal({{ json_encode($dropImages) }})">
                   View Images
                 </button>
               @else
                 <span class="text-slate-400 text-xs">No Images</span>
               @endif
             </td>
+
+            <td class="border p-2 text-center">
+              <span class="text-green-600 font-semibold">Dropped</span>
+            </td>
           </tr>
         @empty
           <tr>
-            <td colspan="6" class="p-3 text-center text-slate-500">No entries yet.</td>
+            <td colspan="5" class="p-3 text-center text-slate-500">No drop entries yet.</td>
           </tr>
         @endforelse
         </tbody>
