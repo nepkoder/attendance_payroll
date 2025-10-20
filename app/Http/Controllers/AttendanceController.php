@@ -11,11 +11,6 @@ use Illuminate\Support\Facades\Auth;
 
 class AttendanceController extends Controller
 {
-  use Illuminate\Http\Request;
-  use Illuminate\Support\Facades\Auth;
-  use Carbon\Carbon;
-  use App\Models\Attendance;
-  use App\Models\Employee;
 
   public function markIn(Request $request)
   {
