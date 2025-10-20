@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Attendance;
 use App\Models\Employee;
+use App\Models\VehiclePickup;
 use Carbon\Carbon;
 use http\Client\Curl\User;
 use Illuminate\Http\Request;
@@ -47,9 +48,59 @@ class AdminController extends Controller
 
   // dashboard
   public function dashboard(Request $request) {
+      $today = Carbon::today();
 
-    return view('admin.dashboard');
-  }
+      // Total stats
+      $totalEmployees = Employee::count();
+
+    $attendances = Attendance::all();
+    $totalSeconds = $attendances->sum(function ($att) {
+      if ($att->mark_in && $att->mark_out) {
+        return Carbon::parse($att->mark_in)->diffInSeconds(Carbon::parse($att->mark_out));
+      }
+      return 0;
+    });
+
+    $totalHours = round($totalSeconds / 3600, 2);
+
+      $totalEarnings = Attendance::sum('earning');
+      $totalPickups = VehiclePickup::count();
+      $totalDrops = VehiclePickup::whereHas('drop')->count();
+
+      // Online / Away employees
+      $onlineEmployees = Employee::whereHas('attendances', function($q){
+        $q->whereNull('mark_out');
+      })->count();
+      $awayEmployees = $totalEmployees - $onlineEmployees;
+
+      // Today's stats
+    $todayAttendances = Attendance::whereDate('mark_in', $today)->get();
+
+    $todayAttendanceSeconds = $todayAttendances->sum(function ($att) {
+      if ($att->mark_in && $att->mark_out) {
+        return Carbon::parse($att->mark_in)->diffInSeconds(Carbon::parse($att->mark_out));
+      }
+      return 0;
+    });
+
+    $todayHours = round($todayAttendanceSeconds / 3600, 2);
+
+      $todayEarnings = Attendance::whereDate('mark_in', $today)->sum('earning');
+      $todayPickups = VehiclePickup::whereDate('created_at', $today)->count();
+      $todayDrops = VehiclePickup::whereHas('drop', function($q) use ($today) {
+        $q->whereDate('created_at', $today);
+      })->count();
+
+      $todayEmployeesIn = Attendance::whereDate('mark_in', $today)
+        ->distinct('employee_id')
+        ->count('employee_id');
+
+      return view('admin.dashboard', compact(
+        'totalEmployees', 'totalHours', 'totalEarnings', 'totalPickups', 'totalDrops',
+        'onlineEmployees', 'awayEmployees',
+        'todayHours', 'todayEarnings', 'todayPickups', 'todayDrops', 'todayEmployeesIn'
+      ));
+    }
 
   public function setting() {
     return view('admin.setting');

@@ -3,7 +3,7 @@
 return [
   "creatorName" => "Software Sewa",
   "creatorUrl" => "https://softwaresewa.in",
-  "templateName" => "markIn",
+  "templateName" => "TapShift",
   "templateSuffix" => "Sneat Bootstrap Dashboard FREE",
   "templateVersion" => "2.0.0",
   "templateFree" => true,

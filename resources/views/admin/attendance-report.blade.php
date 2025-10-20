@@ -40,7 +40,7 @@
 
         <div class="bg-white rounded-2xl shadow p-6 text-center hover:scale-105 transition transform duration-200">
           <div class="text-slate-500 font-semibold">Total Earnings</div>
-          <div class="text-3xl font-bold text-slate-800 mt-2">£ {{ $summary['total_earning'] ?? 0 }}</div>
+          <div class="text-3xl font-bold text-slate-800 mt-2">£ {{ number_format($summary['total_earning'] ?? 0,2) }}</div>
         </div>
       </div>
 
@@ -71,7 +71,7 @@
               <td>{{ $att->mark_out ? $att->mark_out->format('h:i A') : '-' }}</td>
               <td>{{ $att->hour ?? '0' }}</td>
               <td>£ {{ $att->hourly_rate ?? '0' }}</td>
-              <td>£ {{ $att->earning ?? '0' }}</td>
+              <td>£ {{ number_format($att->earning ?? '0',2) }}</td>
               <td>{{ $att->employee->mark_in_location?->alias ?? '-' }}</td>
               <td>{{ $att->employee->mark_out_location?->alias ?? '-' }}</td>
             </tr>

@@ -49,7 +49,7 @@
 <body class="min-h-screen bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 text-slate-800">
 <div class="w-full">
   <header
-    class="bg-white/60 shadow p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sticky top-0 z-50">
+    class="bg-white shadow p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sticky top-0 z-50">
     <div class="flex items-center gap-3">
       <div
         class="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-400 to-pink-500 flex items-center justify-center text-white font-bold text-lg">

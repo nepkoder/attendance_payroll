@@ -45,6 +45,10 @@ class EmployeeController extends Controller
       'seconds' => $totalSeconds % 60,
     ];
 
+    $totalHoursDecimal = $totalSeconds / 3600; // converts total seconds to hours
+    $totalHoursDecimal = round($totalHoursDecimal, 2); // round to 2 decimals
+
+
     // Today's earning
     $today = Carbon::today();
     $todayEarnings = $attendances->where('mark_in', '>=', $today)->sum('earning');
@@ -96,6 +100,7 @@ class EmployeeController extends Controller
       'todayEarnings',
 //      'sessionTime',
       'markinTime',
+      'totalHoursDecimal',
       'markoutTime',
       'sessionStatus',
       'totalPickups',

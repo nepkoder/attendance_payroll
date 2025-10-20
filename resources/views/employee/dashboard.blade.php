@@ -10,15 +10,19 @@
       <div class="p-4 rounded-xl bg-white shadow text-center card-animated">
         <div class="text-sm text-slate-500">Total Hours</div>
         <div id="totalHours" class="text-2xl font-bold">
-          @php
-            $parts = [];
-            if($totalTime['days'] ?? 0) $parts[] = $totalTime['days'].'d';
-            if($totalTime['hours'] ?? 0) $parts[] = $totalTime['hours'].'h';
-            if($totalTime['minutes'] ?? 0) $parts[] = $totalTime['minutes'].'m';
-            if($totalTime['seconds'] ?? 0) $parts[] = $totalTime['seconds'].'s';
-          @endphp
-          {{ $parts ? implode(' ', $parts) : '0h' }}
+          {{ $totalHoursDecimal }} h
         </div>
+
+        {{--        <div id="totalHours" class="text-2xl font-bold">--}}
+{{--          @php--}}
+{{--            $parts = [];--}}
+{{--            if($totalTime['days'] ?? 0) $parts[] = $totalTime['days'].'d';--}}
+{{--            if($totalTime['hours'] ?? 0) $parts[] = $totalTime['hours'].'h';--}}
+{{--            if($totalTime['minutes'] ?? 0) $parts[] = $totalTime['minutes'].'m';--}}
+{{--            if($totalTime['seconds'] ?? 0) $parts[] = $totalTime['seconds'].'s';--}}
+{{--          @endphp--}}
+{{--          {{ $parts ? implode(' ', $parts) : '0h' }}--}}
+{{--        </div>--}}
       </div>
 
       <div class="p-4 rounded-xl bg-white shadow text-center card-animated">
