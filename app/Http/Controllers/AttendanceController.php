@@ -128,7 +128,6 @@ class AttendanceController extends Controller
       }
     }
 
-
     $attendance->mark_out = now();
     $attendance->out_latitude = $userLat ?? 0;
     $attendance->out_longitude = $userLng ?? 0;
