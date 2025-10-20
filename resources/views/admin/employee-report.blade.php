@@ -6,82 +6,80 @@
 
     <div class="card-header d-flex align-items-center justify-content-between">
       <h5 class="mb-0">Employee Report</h5>
-      <form method="GET" class="d-flex gap-3 align-items-center mb-0">
-        <select name="view" class="form-select form-select-sm" onchange="this.form.submit()">
-          <option value="daily" {{ ($view ?? '') == 'daily' ? 'selected' : '' }}>Daily</option>
-          <option value="weekly" {{ ($view ?? '') == 'weekly' ? 'selected' : '' }}>Weekly</option>
-          <option value="monthly" {{ ($view ?? '') == 'monthly' ? 'selected' : '' }}>Monthly</option>
-        </select>
-
-        <input type="date" name="date" value="{{ $date ?? '' }}" class="form-control form-control-sm"
-               onchange="this.form.submit()">
+      <form method="GET" class="d-flex flex-col sm:flex-row gap-3 items-start sm:items-end flex-wrap">
+        <div class="flex flex-col">
+          <label class="text-sm text-slate-600">From:</label>
+          <input type="date" name="from" value="{{ $from->format('Y-m-d') }}"
+                 class="border rounded px-3 py-1 focus:ring-1 focus:ring-indigo-500">
+        </div>
+        <div class="flex flex-col">
+          <label class="text-sm text-slate-600">To:</label>
+          <input type="date" name="to" value="{{ $to->format('Y-m-d') }}"
+                 class="border rounded px-3 py-1 focus:ring-1 focus:ring-indigo-500">
+        </div>
+        <button type="submit"
+                class="btn btn-sm btn-primary">
+          Filter
+        </button>
       </form>
     </div>
 
     <div class="card-body">
+
+      {{-- Table --}}
       <div class="table-responsive">
-        <table class="table table-bordered table-striped">
+        <table class="table table-bordered table-hover table-striped">
           <thead class="table-dark">
           <tr>
             <th>Employee</th>
             <th>Phone</th>
-            <th>Company / Department</th>
-            <th>Mark In Location</th>
-            <th>Mark Out Location</th>
-            <th>Attendance Hours</th>
-            <th>Daily Earnings</th>
-            <th>Pickup / Drop</th>
-            <th>Remarks</th>
+            <th>Company / Dept</th>
+            <th>Total Hours</th>
+            <th>Total Earnings</th>
+            <th>Pickups</th>
+            <th>Drops</th>
+            <th>Mark In Count</th>
+            <th>Mark Out Count</th>
+            <th>Action</th>
           </tr>
           </thead>
           <tbody>
-          @foreach($employees as $emp)
+          @forelse($employees as $emp)
             <tr>
-              <td>
-                <div class="d-flex justify-content-between align-items-center">
-                  <div>
-                    <div class="fw-bold">{{ $emp->name }}</div>
-                    <div class="text-muted small">{{ $emp->email }}</div>
-                  </div>
-                  @if($emp->image)
-                    <img src="{{ asset('storage/'.$emp->image) }}" class="rounded-circle ms-3" width="50" height="50" alt="{{ $emp->name }}">
-                  @endif
+              <td class="p-3 flex items-center gap-2">
+                @if($emp->image)
+                  <img src="{{ asset('storage/'.$emp->image) }}" class="w-10 h-10 rounded-full object-cover">
+                @endif
+                <div class="truncate">
+                  <div class="font-medium">{{ $emp->name }}</div>
+                  <div class="text-xs text-slate-500 truncate">{{ $emp->email }}</div>
                 </div>
               </td>
-              <td>{{ $emp->phone ?? '-' }}</td>
-              <td>{{ $emp->company ?? '-' }} / {{ $emp->department ?? '-' }}</td>
-              <td>{{ $emp->markInLocation->alias ?? '-' }}</td>
-              <td>{{ $emp->markOutLocation->alias ?? '-' }}</td>
-
-              <td>
-                @foreach($emp->filtered_attendances as $att)
-                  {{ $att->hour ?? '-' }}<br>
-                @endforeach
+              <td class="p-3">{{ $emp->phone ?? '-' }}</td>
+              <td class="p-3">{{ $emp->company ?? '-' }} / {{ $emp->department ?? '-' }}</td>
+              <td class="p-3 text-right">{{ $emp->total_hours }}</td>
+              <td class="p-3 text-right">£{{ number_format($emp->total_earnings,2) }}</td>
+              <td class="p-3 text-right">{{ $emp->total_pickups }}</td>
+              <td class="p-3 text-right">{{ $emp->total_drops }}</td>
+              <td class="p-3 text-right">{{ $emp->mark_in_count }}</td>
+              <td class="p-3 text-right">{{ $emp->mark_out_count }}</td>
+              <td class="p-3 text-center">
+                <a
+                  href="{{ route('employee.summary', ['employee' => $emp->id, 'from' => $from->format('Y-m-d'), 'to' => $to->format('Y-m-d')]) }}"
+                  class="btn btn-sm btn-info">
+                  View Summary
+                </a>
               </td>
-
-              <td>
-                @foreach($emp->filtered_attendances as $att)
-                  {{ $att->earning ?? '-' }}<br>
-                @endforeach
-              </td>
-
-              <td>
-                @foreach($emp->filtered_pickups as $p)
-                  Pickup: {{ $p->vehicle_number }}<br>
-                  @if($p->drop)
-                    Drop: {{ $p->drop->vehicle_number ?? '-' }}<br>
-                  @endif
-                @endforeach
-              </td>
-
-              <td>{{ $emp->remarks ?? '-' }}</td>
             </tr>
-          @endforeach
+          @empty
+            <tr>
+              <td colspan="10" class="text-center p-4 text-slate-500">No records found.</td>
+            </tr>
+          @endforelse
           </tbody>
         </table>
       </div>
     </div>
-
 
   </div>
 @endsection

@@ -18,6 +18,7 @@ class Attendance extends Model
     'out_latitude',
     'out_longitude',
     'hour',
+    'hourly_rate',
     'earning'
   ];
 
