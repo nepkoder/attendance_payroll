@@ -33,11 +33,20 @@
             </div>
             <div class="mb-3">
               <label>Phone</label>
-              <input type="text" name="phone" class="form-control">
+              <input type="number" name="phone" class="form-control">
             </div>
             <div class="mb-3">
               <label>Mark In Location</label>
               <select name="mark_in_location_id" class="form-select">
+                <option value="">-- Select Location --</option>
+                @foreach($locations as $loc)
+                  <option value="{{ $loc->id }}">{{ $loc->alias }}</option>
+                @endforeach
+              </select>
+            </div>
+            <div class="mb-3">
+              <label>Mark Out Location</label>
+              <select name="mark_out_location_id" class="form-select">
                 <option value="">-- Select Location --</option>
                 @foreach($locations as $loc)
                   <option value="{{ $loc->id }}">{{ $loc->alias }}</option>
@@ -49,13 +58,8 @@
           <!-- Right -->
           <div class="col-md-6">
             <div class="mb-3">
-              <label>Mark Out Location</label>
-              <select name="mark_out_location_id" class="form-select">
-                <option value="">-- Select Location --</option>
-                @foreach($locations as $loc)
-                  <option value="{{ $loc->id }}">{{ $loc->alias }}</option>
-                @endforeach
-              </select>
+              <label>Hourly Rate</label>
+              <input type="number" name="hourly_rate" class="form-control">
             </div>
             <div class="mb-3">
               <label>Department</label>

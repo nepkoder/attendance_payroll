@@ -17,7 +17,7 @@
           <tr>
             <th>#</th>
             <th>Name</th>
-            <th>Username</th>
+            <th>Hourly</th>
             <th>Mark In Location</th>
             <th>Mark Out Location</th>
             <th>Status</th>
@@ -41,7 +41,7 @@
                   </div>
                 </div>
               </td>
-              <td>{{ $emp->username }}</td>
+              <td>£ {{ $emp->hourly_rate ?? '0' }}</td>
               <td>{{ $emp->markInLocation?->alias ?? '-' }}</td>
               <td>{{ $emp->markOutLocation?->alias ?? '-' }}</td>
               <td>

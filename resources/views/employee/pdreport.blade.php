@@ -1,63 +1,67 @@
 @extends('layouts.employee')
 
 @section('content')
-  <section id="page-pdReport" class="glass rounded-2xl p-6 shadow-md">
+  <section id="pd-report" >
 
     {{-- Header & Date Filter --}}
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
-      <h2 class="text-lg font-semibold">Pickup / Drop Report</h2>
-      <form method="GET" action="{{ route('employee.pdreport') }}" class="flex gap-3 items-end flex-wrap">
-        <div>
-          <label class="block text-sm text-gray-600">From:</label>
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+      <h2 class="text-2xl font-bold text-slate-800">Pickup / Drop Report</h2>
+      <form method="GET" action="{{ route('employee.pdreport') }}"
+            class="flex flex-col sm:flex-row gap-3 items-start sm:items-end flex-wrap">
+        <div class="flex flex-col">
+          <label class="text-sm font-medium text-slate-600">From:</label>
           <input type="date" name="from"
                  value="{{ $from ? $from->format('Y-m-d') : '' }}"
-                 class="form-control form-control-sm">
+                 class="border border-slate-300 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
         </div>
-        <div>
-          <label class="block text-sm text-gray-600">To:</label>
+        <div class="flex flex-col">
+          <label class="text-sm font-medium text-slate-600">To:</label>
           <input type="date" name="to"
                  value="{{ $to ? $to->format('Y-m-d') : '' }}"
-                 class="form-control form-control-sm">
+                 class="border border-slate-300 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
         </div>
-        <button type="submit" class="px-4 py-2 bg-indigo-500 text-white rounded">Filter</button>
+        <button type="submit"
+                class="mt-2 sm:mt-0 px-4 py-2 bg-indigo-600 text-white font-semibold rounded hover:bg-indigo-700 transition">
+          Filter
+        </button>
       </form>
     </div>
 
     {{-- Summary Cards --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-      <div class="bg-white rounded-xl shadow p-4 text-center">
-        <div class="text-slate-500 font-semibold">Total Pickups</div>
-        <div class="text-xl font-bold text-slate-800 mt-1">{{ $summary['total_pickups'] ?? 0 }}</div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div class="bg-white rounded-xl shadow p-4 text-center hover:shadow-lg transition">
+        <div class="text-sm font-medium text-slate-500">Total Pickups</div>
+        <div class="text-2xl font-bold text-slate-800 mt-1">{{ $summary['total_pickups'] ?? 0 }}</div>
       </div>
-      <div class="bg-white rounded-xl shadow p-4 text-center">
-        <div class="text-slate-500 font-semibold">Total Drops</div>
-        <div class="text-xl font-bold text-slate-800 mt-1">{{ $summary['total_drops'] ?? 0 }}</div>
+      <div class="bg-white rounded-xl shadow p-4 text-center hover:shadow-lg transition">
+        <div class="text-sm font-medium text-slate-500">Total Drops</div>
+        <div class="text-2xl font-bold text-slate-800 mt-1">{{ $summary['total_drops'] ?? 0 }}</div>
       </div>
     </div>
 
-    {{-- Table --}}
-    <div class="overflow-auto max-h-96">
-      <table class="w-full text-sm border-collapse border border-slate-200">
-        <thead class="bg-slate-100 text-slate-700">
+    {{-- Pickup / Drop Table --}}
+    <div class="overflow-x-auto rounded-lg shadow-lg">
+      <table class="min-w-full text-sm border-collapse border border-slate-200">
+        <thead class="bg-indigo-50 text-indigo-700">
         <tr>
-          <th class="text-left p-2 border">Vehicle</th>
-          <th class="text-left p-2 border">Pickup Time</th>
-          <th class="text-left p-2 border">Drop Time</th>
-          <th class="text-left p-2 border text-center">Pickup Images</th>
-          <th class="text-left p-2 border text-center">Drop Images</th>
-          <th class="text-right p-2 border">Pickup Remarks</th>
-          <th class="text-right p-2 border">Drop Remarks</th>
+          <th class="p-3 border text-left font-medium">Vehicle</th>
+          <th class="p-3 border text-left font-medium">Pickup Time</th>
+          <th class="p-3 border text-left font-medium">Drop Time</th>
+          <th class="p-3 border text-center font-medium">Pickup Images</th>
+          <th class="p-3 border text-center font-medium">Drop Images</th>
+          <th class="p-3 border text-right font-medium">Pickup Remarks</th>
+          <th class="p-3 border text-right font-medium">Drop Remarks</th>
         </tr>
         </thead>
-        <tbody>
+        <tbody class="bg-white divide-y divide-slate-200">
         @forelse($pickups as $pickup)
-          <tr class="hover:bg-slate-50">
-            <td class="p-2 border">{{ $pickup->vehicle_number }}</td>
-            <td class="p-2 border">{{ $pickup->created_at->format('Y-m-d H:i') }}</td>
-            <td class="p-2 border">{{ $pickup->drop ? $pickup->drop->created_at->format('Y-m-d H:i') : '-' }}</td>
+          <tr class="hover:bg-indigo-50 transition">
+            <td class="p-3 border">{{ $pickup->vehicle_number }}</td>
+            <td class="p-3 border">{{ $pickup->created_at->format('Y-m-d H:i') }}</td>
+            <td class="p-3 border">{{ $pickup->drop ? $pickup->drop->created_at->format('Y-m-d H:i') : '-' }}</td>
 
             {{-- Pickup Images --}}
-            <td class="p-2 border text-center">
+            <td class="p-3 border text-center">
               @php
                 $pickupImages = array_filter(array_merge(
                     $pickup->camera_image ? [$pickup->camera_image] : [],
@@ -75,7 +79,7 @@
             </td>
 
             {{-- Drop Images --}}
-            <td class="p-2 border text-center">
+            <td class="p-3 border text-center">
               @php
                 $dropImages = $pickup->drop ? array_filter(array_merge(
                     $pickup->drop->camera_image ? [$pickup->drop->camera_image] : [],
@@ -92,12 +96,12 @@
               @endif
             </td>
 
-            <td class="p-2 border">{{ $pickup->remarks ?? '-' }}</td>
-            <td class="p-2 border">{{ $pickup->drop->remarks ?? '-' }}</td>
+            <td class="p-3 border text-right">{{ $pickup->remarks ?? '-' }}</td>
+            <td class="p-3 border text-right">{{ $pickup->drop->remarks ?? '-' }}</td>
           </tr>
         @empty
           <tr>
-            <td colspan="7" class="text-center p-3 text-slate-500">No entries found.</td>
+            <td colspan="7" class="text-center p-4 text-slate-500">No entries found.</td>
           </tr>
         @endforelse
         </tbody>

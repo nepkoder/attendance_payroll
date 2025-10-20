@@ -88,10 +88,6 @@
                 @endforeach
               </select>
             </div>
-          </div>
-
-          <!-- Right Column -->
-          <div class="col-md-6">
             <div class="mb-3">
               <label for="mark_out_location_id" class="form-label">Mark Out Location</label>
               <select name="mark_out_location_id" id="mark_out_location_id" class="form-select">
@@ -102,6 +98,22 @@
                   </option>
                 @endforeach
               </select>
+            </div>
+          </div>
+
+          <!-- Right Column -->
+          <div class="col-md-6">
+
+            <div class="mb-3">
+              <label for="hourly_rate" class="form-label">Hourly Rate</label>
+              <input
+                type="number"
+                name="hourly_rate"
+                class="form-control"
+                id="hourly_rate"
+                value="{{ old('hourly_rate', $employee->hourly_rate) }}"
+                placeholder="Rate in £"
+              >
             </div>
 
             <div class="mb-3">
@@ -169,16 +181,16 @@
               </select>
             </div>
 
-            <div class="mb-3">
-              <label for="remarks" class="form-label">Remarks</label>
-              <textarea
-                name="remarks"
-                id="remarks"
-                class="form-control"
-                rows="3"
-                placeholder="Enter notes or details..."
-              >{{ old('remarks', $employee->remarks) }}</textarea>
-            </div>
+{{--            <div class="mb-3">--}}
+{{--              <label for="remarks" class="form-label">Remarks</label>--}}
+{{--              <textarea--}}
+{{--                name="remarks"--}}
+{{--                id="remarks"--}}
+{{--                class="form-control"--}}
+{{--                rows="3"--}}
+{{--                placeholder="Enter notes or details..."--}}
+{{--              >{{ old('remarks', $employee->remarks) }}</textarea>--}}
+{{--            </div>--}}
           </div>
         </div>
 

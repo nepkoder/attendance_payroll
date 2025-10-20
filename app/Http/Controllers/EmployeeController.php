@@ -426,7 +426,8 @@ class EmployeeController extends Controller
       'image' => 'nullable|image|mimes:jpg,png,jpeg',
       'document_image' => 'nullable|file|mimes:pdf,jpg,png,jpeg',
       'mark_in_location_id' => 'nullable|exists:locations,id',
-      'mark_out_location_id' => 'nullable|exists:locations,id'
+      'mark_out_location_id' => 'nullable|exists:locations,id',
+      'hourly_rate' => 'nullable'
     ]);
 
     $data = $request->except(['image', 'document_image', 'password']);

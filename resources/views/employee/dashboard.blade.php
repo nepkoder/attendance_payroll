@@ -153,24 +153,56 @@
     @endif
 
     const getLocationAndSend = async (url) => {
-      let latitude = 0;
-      let longitude = 0;
+      // Show loading message
+      messageDiv.textContent = 'Getting your location...';
+      messageDiv.style.color = 'blue';
 
-      // Try to get real geolocation if supported
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            latitude = position.coords.latitude;
-            longitude = position.coords.longitude;
-            sendAttendanceData(url, latitude, longitude);
-          },
-          () => {
-            // fallback if user denies
-            sendAttendanceData(url, latitude, longitude);
-          }
-        );
-      } else {
-        sendAttendanceData(url, latitude, longitude);
+      // Check if geolocation is supported
+      if (!navigator.geolocation) {
+        messageDiv.textContent = 'Geolocation is not supported by your browser.';
+        messageDiv.style.color = 'red';
+        return;
+      }
+
+      try {
+        // Get current position with Promise
+        messageDiv.textContent = 'Requesting location permission...';
+
+        const position = await new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            enableHighAccuracy: false,
+            timeout: 20000, // Increased timeout
+            maximumAge: 30000
+          });
+        });
+
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+
+        // Show sending message
+        messageDiv.textContent = 'Location received. Marking attendance...';
+        messageDiv.style.color = 'blue';
+
+        // Send data
+        await sendAttendanceData(url, latitude, longitude);
+
+      } catch (error) {
+
+        console.log(error.message)
+
+        // Handle specific error types
+        if (error.code === 1) {
+          messageDiv.textContent = 'Location permission denied. Please enable location access to mark attendance.';
+        } else if (error.code === 2) {
+          messageDiv.textContent = 'Location unavailable. Please check your device settings.';
+        } else if (error.code === 3) {
+          messageDiv.textContent = 'Location request timed out. Please try again.';
+        } else {
+          messageDiv.textContent = 'Failed to get location. Please enable location and try again.';
+        }
+        messageDiv.style.color = 'red';
+        // await sendAttendanceData(url, 10, 10);
+
       }
     };
 
@@ -188,22 +220,24 @@
         const data = await response.json();
 
         if (!response.ok) {
-          messageDiv.textContent = data.error || 'Failed.';
+          messageDiv.textContent = data.error || 'Failed to mark attendance.';
           messageDiv.style.color = 'red';
           return;
         }
 
-        messageDiv.textContent = data.message || 'Success!';
+        messageDiv.textContent = data.message || 'Attendance marked successfully!';
         messageDiv.style.color = 'green';
-        location.reload();
+
+        // Reload after showing success message
+        setTimeout(() => location.reload(), 1500);
       } catch (err) {
         console.error(err);
-        messageDiv.textContent = 'Network error.';
+        messageDiv.textContent = 'Network error. Please check your connection.';
         messageDiv.style.color = 'red';
       }
     };
 
-    // Attach click events
+// Attach click events
     document.getElementById('markInBtn')?.addEventListener('click', () => {
       getLocationAndSend('{{ route("employee.attendance.markIn") }}');
     });

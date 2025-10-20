@@ -3,12 +3,12 @@
     {
       "url": "admin/dashboard",
       "name": "Dashboards",
-      "icon": "menu-icon icon-base bx bx-home-smile",
+      "icon": "menu-icon icon-base bx bx-home",
       "slug": "dashboard"
     },
     {
       "name": "Employees",
-      "icon": "menu-icon icon-base bx bx-dock-top",
+      "icon": "menu-icon icon-base bx bx-group",
       "slug": "admin/employee",
       "submenu": [
         {
@@ -25,60 +25,60 @@
     },
     {
       "name": "Location",
-      "icon": "menu-icon icon-base bx bx-lock-open-alt",
-      "slug": "auth",
+      "icon": "menu-icon icon-base bx bx-map",
+      "slug": "location",
       "submenu": [
         {
           "url": "admin/location",
           "name": "View List",
-          "slug": "auth-login-basic"
+          "slug": "location-list"
         },
         {
           "url": "admin/location/add",
           "name": "Add New",
-          "slug": "auth-register-basic"
+          "slug": "location-add"
         }
       ]
     },
     {
       "name": "Hourly Rate",
-      "icon": "menu-icon icon-base bx bx-collection",
+      "icon": "menu-icon icon-base bx bx-time-five",
       "slug": "hourly-rate",
       "url": "admin/hourly-rate"
     },
     {
       "name": "Deductions",
-      "icon": "menu-icon icon-base bx bx-cube-alt",
-      "slug": "pages-misc",
+      "icon": "menu-icon icon-base bx bx-wallet",
+      "slug": "deductions",
       "submenu": [
         {
           "url": "pages/misc-error",
           "name": "Payouts",
-          "slug": "pages-misc-error"
+          "slug": "payouts"
         }
       ]
     },
     {
       "name": "Employee Report",
-      "icon": "menu-icon icon-base bx bx-collection",
-      "slug": "cards-basic",
+      "icon": "menu-icon icon-base bx bx-bar-chart-alt-2",
+      "slug": "employee-report",
       "url": "admin/employee-report"
     },
     {
       "url": "admin/attendance-report",
-      "icon": "menu-icon icon-base bx bx-crown",
-      "name": "Attenance Report",
-      "slug": "icons-boxicons"
+      "icon": "menu-icon icon-base bx bx-calendar-check",
+      "name": "Attendance Report",
+      "slug": "attendance-report"
     },
     {
       "url": "admin/setting",
-      "icon": "menu-icon icon-base bx bx-file",
+      "icon": "menu-icon icon-base bx bx-cog",
       "name": "Settings",
       "slug": "settings"
     },
     {
       "url": "admin/support",
-      "icon": "menu-icon icon-base bx bx-support",
+      "icon": "menu-icon icon-base bx bx-help-circle",
       "name": "Help & Support",
       "slug": "support"
     }

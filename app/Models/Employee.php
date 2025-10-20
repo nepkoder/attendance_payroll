@@ -14,7 +14,7 @@ class Employee extends Authenticatable
   protected $fillable = [
     'name', 'username', 'email', 'password', 'phone',
     'company', 'department', 'address', 'document_no',
-    'document_image', 'image', 'remarks','status',
+    'document_image', 'image', 'remarks','status', 'hourly_rate',
     'mark_in_location_id', 'mark_out_location_id',
   ];
 

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Attendance;
+use App\Models\Employee;
+use App\Models\Location;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -27,11 +29,21 @@ class AttendanceController extends Controller
       return response()->json(['error' => 'Already marked in. Please mark out first.'], 400);
     }
 
+    $location = Employee::with('markInLocation')->find($employee->id);
+
+    $inLat = $request->latitude;
+    $inLng = $request->longitude;
+
+    if ($location && $location->markInLocation) {
+      $inLat = $location->markInLocation->latitude;
+      $inLng = $location->markInLocation->longitude;
+    }
+
     $attendance = Attendance::create([
       'employee_id' => $employee->id,
       'mark_in' => now(),
-      'in_latitude' => $request->latitude,
-      'in_longitude' => $request->longitude,
+      'in_latitude' => $inLat ?? 0,
+      'in_longitude' => $inLng ?? 0,
       'hourly_rate' => $employee->hourly_rate
     ]);
 
@@ -54,9 +66,20 @@ class AttendanceController extends Controller
       return response()->json(['error' => 'No active session found. Please mark in first.'], 400);
     }
 
+
+    $location = Employee::with('markOutLocation')->find($employee->id);
+
+    $outLat = $request->latitude ?? 0;
+    $outLng = $request->longitude ?? 0;
+
+    if ($location && $location->markOutLocation) {
+      $outLat = $location->markOutLocation->latitude;
+      $outLng = $location->markOutLocation->longitude;
+    }
+
     $attendance->mark_out = now();
-    $attendance->out_latitude = $request->latitude;
-    $attendance->out_longitude = $request->longitude;
+    $attendance->out_latitude = $outLat ?? 0;
+    $attendance->out_longitude = $outLng ?? 0;
 
     // Calculate worked hours & earnings
     $hours = Carbon::parse($attendance->mark_in)->diffInMinutes($attendance->mark_out) / 60;
