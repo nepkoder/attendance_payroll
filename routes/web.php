@@ -42,6 +42,10 @@ Route::prefix('admin')->group(function () {
     Route::get('/employee-report', [AdminController::class, 'employeeReport'])->name('admin.employee.report');
     Route::get('/attendance-report', [AdminController::class, 'attendanceReport'])->name('admin.attendance.report');
     Route::get('/support', [AdminController::class, 'supportHelp'])->name('admin.support');
+
+    Route::get('/setting', [AdminController::class, 'setting'])->name('admin.setting');
+    Route::post('/update-timezone', [AdminController::class, 'updateTimezone'])->name('timezone.update');
+
   });
 
 

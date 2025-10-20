@@ -7,6 +7,7 @@ use App\Models\Employee;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 
 class AdminController extends Controller
 {
@@ -44,6 +45,10 @@ class AdminController extends Controller
   public function dashboard(Request $request) {
 
     return view('admin.dashboard');
+  }
+
+  public function setting() {
+    return view('admin.setting');
   }
 
   public function supportHelp() {
@@ -103,6 +108,37 @@ class AdminController extends Controller
     ];
 
     return view('admin.attendance-report', compact('attendances', 'summary', 'view'));
+  }
+
+  public function updateTimezone(Request $request)
+  {
+    $request->validate([
+      'timezone' => 'required|in:' . implode(',', timezone_identifiers_list()),
+    ]);
+
+    $timezone = $request->timezone;
+
+    $envPath = base_path('.env');
+
+    if (File::exists($envPath)) {
+      $envContent = file_get_contents($envPath);
+
+      // Replace APP_TIMEZONE if it exists
+      if (strpos($envContent, 'APP_TIMEZONE=') !== false) {
+        $envContent = preg_replace('/APP_TIMEZONE=.*/', 'APP_TIMEZONE=' . $timezone, $envContent);
+      } else {
+        // Append APP_TIMEZONE if not present
+        $envContent .= "\nAPP_TIMEZONE={$timezone}";
+      }
+
+      file_put_contents($envPath, $envContent);
+    }
+
+    // Update runtime config immediately
+    config(['app.timezone' => $timezone]);
+    date_default_timezone_set($timezone);
+
+    return back()->with('success', 'Application timezone updated to ' . $timezone);
   }
 
 

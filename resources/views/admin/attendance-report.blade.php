@@ -3,7 +3,7 @@
 @section('title', 'Employee Attendance Report')
 
 @section('content')
-  <section class="card">
+  <div class="card">
 
     <div class="card-header d-flex align-items-center justify-content-between">
       <h5 class="mb-0">Attendance Report</h5>
@@ -86,5 +86,5 @@
     </div>
 
 
-  </section>
+  </div>
 @endsection
