@@ -12,12 +12,12 @@
     {
       "name": "Employees",
       "icon": "menu-icon icon-base bx bx-dock-top",
-      "slug": "employee",
+      "slug": "admin/employee",
       "submenu": [
         {
           "url": "admin/employee",
           "name": "View List",
-          "slug": "employee-list"
+          "slug": "employee"
         },
         {
           "url": "admin/employee/create",
@@ -46,7 +46,7 @@
     {
       "name": "Hourly Rate",
       "icon": "menu-icon icon-base bx bx-collection",
-      "slug": "cards-basic",
+      "slug": "hourly-rate",
       "url": "admin/hourly-rate"
     },
     {
