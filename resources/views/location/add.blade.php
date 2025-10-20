@@ -33,7 +33,7 @@
             <!-- Get Current Location Button -->
             <div class="mb-3">
               <button type="button" id="getLocationBtn" class="btn btn-outline-primary w-100">
-                📍 Get Current Location
+                <span id="btnIcon">📍</span> <span id="btnText">Get Current Location</span>
               </button>
               <small id="locationMessage" class="d-block mt-2 text-muted"></small>
             </div>
@@ -91,55 +91,114 @@
 
 @push('scripts')
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', function() {
       const getLocationBtn = document.getElementById('getLocationBtn');
       const latitudeInput = document.getElementById('latitude');
       const longitudeInput = document.getElementById('longitude');
       const messageEl = document.getElementById('locationMessage');
+      const btnIcon = document.getElementById('btnIcon');
+      const btnText = document.getElementById('btnText');
 
-      getLocationBtn.addEventListener('click', () => {
-        messageEl.textContent = "📡 Fetching your current location...";
-        messageEl.classList.remove('text-danger', 'text-success');
-        messageEl.classList.add('text-muted');
-
+      getLocationBtn.addEventListener('click', function() {
+        // Check if browser supports geolocation
         if (!navigator.geolocation) {
-          messageEl.textContent = "❌ Geolocation is not supported by your browser.";
-          messageEl.classList.remove('text-muted');
-          messageEl.classList.add('text-danger');
+          showMessage("❌ Geolocation is not supported by your browser.", 'danger');
           return;
         }
 
+        // Check if page is served over HTTPS (required for geolocation in most browsers)
+        if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+          showMessage("⚠️ Geolocation requires HTTPS connection. Please use secure connection.", 'warning');
+          return;
+        }
+
+        // Disable button and show loading state
+        getLocationBtn.disabled = true;
+        btnIcon.textContent = '⏳';
+        btnText.textContent = 'Getting Location...';
+        showMessage("📡 Fetching your current location...", 'muted');
+
+        // Options for better accuracy
+        const options = {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        };
+
         navigator.geolocation.getCurrentPosition(
-          (position) => {
+          function(position) {
+            // Success callback
             const lat = position.coords.latitude.toFixed(6);
             const lng = position.coords.longitude.toFixed(6);
 
             latitudeInput.value = lat;
             longitudeInput.value = lng;
 
-            messageEl.textContent = "✅ Location detected successfully!";
-            messageEl.classList.remove('text-muted');
-            messageEl.classList.add('text-success');
+            showMessage(`✅ Location detected successfully! (Accuracy: ${Math.round(position.coords.accuracy)}m)`, 'success');
+
+            // Reset button
+            btnIcon.textContent = '✅';
+            btnText.textContent = 'Location Retrieved';
+
+            setTimeout(function() {
+              btnIcon.textContent = '📍';
+              btnText.textContent = 'Get Current Location';
+              getLocationBtn.disabled = false;
+            }, 2000);
           },
-          (error) => {
+          function(error) {
+            // Error callback
             let errorMsg = "❌ Unable to retrieve your location.";
+
             switch (error.code) {
               case error.PERMISSION_DENIED:
-                errorMsg = "❌ Location permission denied. Please allow access.";
+                errorMsg = "❌ Location permission denied. Please allow location access in your browser settings.";
                 break;
               case error.POSITION_UNAVAILABLE:
-                errorMsg = "⚠️ Location information unavailable.";
+                errorMsg = "⚠️ Location information is unavailable. Check your device's location settings.";
                 break;
               case error.TIMEOUT:
-                errorMsg = "⏳ Location request timed out. Try again.";
+                errorMsg = "⏳ Location request timed out. Please try again.";
                 break;
+              default:
+                errorMsg = "❌ An unknown error occurred while getting location.";
             }
-            messageEl.textContent = errorMsg;
-            messageEl.classList.remove('text-muted', 'text-success');
-            messageEl.classList.add('text-danger');
-          }
+
+            showMessage(errorMsg, 'danger');
+            console.error('Geolocation error:', error);
+
+            // Reset button
+            btnIcon.textContent = '❌';
+            btnText.textContent = 'Failed - Try Again';
+
+            setTimeout(function() {
+              btnIcon.textContent = '📍';
+              btnText.textContent = 'Get Current Location';
+              getLocationBtn.disabled = false;
+            }, 3000);
+          },
+          options
         );
       });
+
+      function showMessage(text, type) {
+        messageEl.textContent = text;
+        messageEl.classList.remove('text-muted', 'text-success', 'text-danger', 'text-warning');
+
+        switch(type) {
+          case 'success':
+            messageEl.classList.add('text-success');
+            break;
+          case 'danger':
+            messageEl.classList.add('text-danger');
+            break;
+          case 'warning':
+            messageEl.classList.add('text-warning');
+            break;
+          default:
+            messageEl.classList.add('text-muted');
+        }
+      }
     });
   </script>
 @endpush
