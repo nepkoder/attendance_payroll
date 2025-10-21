@@ -504,7 +504,7 @@ class EmployeeController extends Controller
       'status' => 'error',
       'message' => 'Invalid username or password.',
       'data' => null
-    ]);
+    ],400);
 
   }
 
