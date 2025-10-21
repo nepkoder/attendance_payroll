@@ -510,6 +510,8 @@ class EmployeeController extends Controller
 
   public function markInMobile(Request $request)
   {
+
+    try {
     $employee = Employee::find($request->id);
 
     // Prevent duplicate mark-in without mark-out
@@ -564,6 +566,13 @@ class EmployeeController extends Controller
       'message' => 'Marked in successfully at location: ' . $location->alias,
       'distanceKm' => round($distanceKm, 3),
     ]);
+
+    } catch (\Exception $e) {
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Failed to marked in: ERror ' . $e->getMessage(),
+      ]);
+    }
   }
 
   public function markOutMobile(Request $request)
@@ -645,7 +654,7 @@ class EmployeeController extends Controller
     return response()->json([
       'status' => 'success',
       'message' => 'Employee Profile Fetched',
-      'data' => Employee::where('id', $request->id)->first()
+      'data' => Employee::find($request->id)
     ]);
   }
 
