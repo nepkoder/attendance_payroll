@@ -709,20 +709,24 @@ class EmployeeController extends Controller
       $q->whereDate('created_at', $today);
     })->count();
 
+    $formattedMarkIn = date('d M Y, h:i A', strtotime($markinTime));
+    $formattedMarkOut = date('d M Y, h:i A', strtotime($markoutTime));
+
     return response()->json([
       'status' => 'success',
       'message' => 'Dashboard fetch completed',
       'data' => array(
         'employee' => $employee,
-        'totalEarnings' => $totalEarnings,
-        'markInTime' => $markinTime,
-        'markOutTime' => $markoutTime,
+        'totalEarnings' => number_format($totalEarnings,2),
+        'markInTime' => $formattedMarkIn,
+        'markOutTime' => $formattedMarkOut,
         'totalHoursDecimal' => $totalHoursDecimal,
         'sessionStatus' => $sessionStatus,
         'totalPickups' => $totalPickups,
         'totalDrops' => $totalDrops,
         'todayPickups' => $todaysPickups,
-        'todaysDrops' => $todaysDrops
+        'todaysDrops' => $todaysDrops,
+        'todaysEarning' => number_format($todayEarnings,2)
       )
     ]);
   }
