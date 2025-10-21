@@ -747,7 +747,7 @@ class EmployeeController extends Controller
     $type = $request->type;
     $from = $request->from;
     $to = $request->to;
-    if (true) {
+    if ($type == 'Attendance') {
 
       // Fetch attendances within range
       $attendances = Attendance::where('employee_id', $id)
@@ -773,7 +773,7 @@ class EmployeeController extends Controller
           'in' => $firstIn,
           'out' => $lastOut,
           'hours' => $totalHours,
-          'earnings' => $totalEarnings,
+          'earnings' => number_format($totalEarnings, 2),
           'deductions' => 0,
           'days' => 1,
         ];
@@ -787,9 +787,56 @@ class EmployeeController extends Controller
       return response()->json([
         'data' => $report,
         'totalHours' => $totalHours,
-        'totalEarning' => $totalEarnings,
+        'totalEarning' => number_format($totalEarnings, 2),
         'totalDays' => $totalDays
       ]);
+
+    }
+
+    if ($type == 'Pickup & Drop') {
+      $query = VehiclePickup::with('drop');
+      $query->whereBetween('created_at', [$from, $to]);
+      $pickups = $query->latest()->get();
+      // Summary
+      $summary = [
+        'data' => $pickups,
+        'total_pickups' => $pickups->count(),
+        'total_drops' => $pickups->where('drop')->count(),
+      ];
+      return response()->json($summary);
+    }
+
+    if ($type == 'Earnings') {
+// Get attendances for the employee in the date range
+      $attendances = Attendance::where('employee_id', $id)
+        ->whereBetween('mark_in', [$from, $to])
+        ->orderBy('mark_in', 'asc')
+        ->get();
+
+      // Group attendances by date
+      $records = $attendances->groupBy(function ($item) {
+        return $item->mark_in->format('Y-m-d');
+      })->map(function ($dayAttendances, $date) {
+        $totalHours = $dayAttendances->sum('hour');
+        $totalEarnings = $dayAttendances->sum('earning');
+        $totalDeductions = $dayAttendances->sum(function ($a) {
+          return ($a->hour * $a->hourly_rate) - $a->earning;
+        });
+
+        return [
+          'period' => $date,
+          'total_hours' => $totalHours,
+          'total_earnings' => $totalEarnings,
+          'total_deductions' => $totalDeductions,
+        ];
+      });
+
+      return response()->json([
+        'data' => $attendances,
+        ...$records
+      ]);
+
+
 
     }
 
