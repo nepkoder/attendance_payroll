@@ -743,7 +743,7 @@ class EmployeeController extends Controller
 
   function employeeReport(Request $request)
   {
-    $id = $request->id();
+    $id = $request->id;
     $type = $request->type;
     $from = $request->from;
     $to = $request->to;
