@@ -832,10 +832,10 @@ class EmployeeController extends Controller
 
       return response()->json([
         'earning_report' => $attendances,
-        ...$records
+        'total_earnings' => $records->sum('total_earnings'),
+        'total_hours' => $records->sum('total_hours'),
+        'total_deduction' => $records->sum('total_deductions'),
       ]);
-
-
 
     }
 
