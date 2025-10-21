@@ -83,4 +83,12 @@ Route::middleware([\App\Http\Middleware\GuardAuth::class . ':employee'])->group(
 });
 
 
+// API for mobile app
+Route::post('/mobile/login', [EmployeeController::class, 'mobileLogin']);
+Route::post('/mobile/markin', [EmployeeController::class, 'markInMobile']);
+Route::post('/mobile/markout', [EmployeeController::class, 'markOutMobile']);
+Route::post('/mobile/profile', [EmployeeController::class, 'employeeProfile']);
+Route::post('/mobile/dashboard', [EmployeeController::class, 'employeeDasbhoardMobile']);
+
+
 

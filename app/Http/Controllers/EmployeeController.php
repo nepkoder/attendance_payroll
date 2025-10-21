@@ -481,5 +481,251 @@ class EmployeeController extends Controller
     return redirect()->route('employee.hourlyRateList')->with('success', 'Hourly rate updated successfully!');
   }
 
+  // Mobile APIs
+  public function mobileLogin(Request $request)
+  {
+    $request->validate([
+      'username' => 'required|string',
+      'password' => 'required|string',
+    ]);
+
+    $credentials = $request->only('username', 'password');
+
+    if (Auth::guard('employee')->attempt($credentials, $request->filled('remember'))) {
+      $employee = Employee::where('username', $request->username)->first();
+      return response()->json([
+        'status' => 'success',
+        'message' => 'Login success',
+        'data' => $employee
+      ]);
+    }
+
+    return response()->json([
+      'status' => 'error',
+      'message' => 'Invalid username or password.',
+      'data' => null
+    ]);
+
+  }
+
+  public function markInMobile(Request $request)
+  {
+    $employee = Employee::find($request->id);
+
+    // Prevent duplicate mark-in without mark-out
+    $existing = Attendance::where('employee_id', $employee->id)
+      ->whereNull('mark_out')
+      ->first();
+
+    if ($existing) {
+      return response()->json(['status' => 'error', 'message' => 'Already marked in. Please mark out first.'], 400);
+    }
+
+    // Get assigned mark-in location (with alias and lat/lng)
+    $employeeData = Employee::with('markInLocation')->find($employee->id);
+
+    // Get user current coordinates from mobile device
+    $userLat = floatval($request->latitude);
+    $userLng = floatval($request->longitude);
+
+    if ($employeeData && $employeeData->markInLocation) {
+
+      $location = $employeeData->markInLocation;
+
+      // Get assigned location coordinates
+      $locLat = floatval($location->latitude);
+      $locLng = floatval($location->longitude);
+
+      // Calculate distance using Haversine formula
+      $distanceKm = $this->haversineKm($userLat, $userLng, $locLat, $locLng);
+
+      // Define radius (in km)
+      $allowedRadiusKm = env('COVERAGE_RADIUS') / 100;
+
+      if ($distanceKm > $allowedRadiusKm) {
+        return response()->json([
+          'status' => 'error',
+          'message' => 'You are too far from the mark-in location (' . round($distanceKm * 1000) . ' meters away).',
+        ], 400);
+      }
+    }
+
+    // Proceed to mark in if within radius
+    $attendance = Attendance::create([
+      'employee_id' => $employee->id,
+      'mark_in' => now(),
+      'in_latitude' => $userLat,
+      'in_longitude' => $userLng,
+      'hourly_rate' => $employee->hourly_rate,
+    ]);
+
+    return response()->json([
+      'status' => 'success',
+      'message' => 'Marked in successfully at location: ' . $location->alias,
+      'distanceKm' => round($distanceKm, 3),
+    ]);
+  }
+
+  public function markOutMobile(Request $request)
+  {
+    $employee = Employee::find($request->id);
+
+    $attendance = Attendance::where('employee_id', $employee->id)
+      ->whereNull('mark_out')
+      ->latest('id')
+      ->first();
+
+    if (!$attendance) {
+      return response()->json(['status' => 'error', 'message' => 'No active session found. Please mark in first.'], 400);
+    }
+
+    // Get assigned mark-in location (with alias and lat/lng)
+    $employeeData = Employee::with('markOutLocation')->find($employee->id);
+
+    // Get user current coordinates from mobile device
+    $userLat = floatval($request->latitude);
+    $userLng = floatval($request->longitude);
+
+    if ($employeeData && $employeeData->markOutLocation) {
+
+      $location = $employeeData->markOutLocation;
+
+      // Get assigned location coordinates
+      $locLat = floatval($location->latitude);
+      $locLng = floatval($location->longitude);
+
+      // Calculate distance using Haversine formula
+      $distanceKm = $this->haversineKm($userLat, $userLng, $locLat, $locLng);
+
+      // Define radius (in km)
+      $allowedRadiusKm = env('COVERAGE_RADIUS') / 100;
+
+      if ($distanceKm > $allowedRadiusKm) {
+        return response()->json([
+          'status' => 'error',
+          'message' => 'You are too far from the mark-out location (' . round($distanceKm * 1000) . ' meters away).',
+        ], 400);
+      }
+    }
+
+    $attendance->mark_out = now();
+    $attendance->out_latitude = $userLat ?? 0;
+    $attendance->out_longitude = $userLng ?? 0;
+
+    // Calculate worked hours & earnings
+    $hours = Carbon::parse($attendance->mark_in)->diffInMinutes($attendance->mark_out) / 60;
+    $attendance->hour = number_format($hours, 2);
+    $attendance->earning = $hours * $attendance->hourly_rate;
+    $attendance->save();
+
+    return response()->json([
+      'status' => 'success',
+      'message' => 'Marked out successfully.',
+      'attendance' => $attendance,
+    ]);
+  }
+
+  private function haversineKm($lat1, $lon1, $lat2, $lon2)
+  {
+    $earthRadius = 6371; // km
+    $dLat = deg2rad($lat2 - $lat1);
+    $dLon = deg2rad($lon2 - $lon1);
+
+    $a = sin($dLat / 2) ** 2 +
+      cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
+      sin($dLon / 2) ** 2;
+
+    $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+    return $earthRadius * $c;
+  }
+
+  public function employeeProfile(Request $request)
+  {
+    return response()->json([
+      'status' => 'success',
+      'message' => 'Employee Profile Fetched',
+      'data' => Employee::where('id', $request->id)->first()
+    ]);
+  }
+
+  public function employeeDasbhoardMobile(Request $request)
+  {
+    // Get logged-in employee
+    $employee = Employee::find($request->id);
+
+    // Get all attendances of this employee
+    $attendances = Attendance::where('employee_id', $employee->id)->get();
+
+    // Total seconds & earnings
+    $totalSeconds = $attendances->sum(function ($attendance) {
+      if ($attendance->mark_in && $attendance->mark_out) {
+        return Carbon::parse($attendance->mark_in)->diffInSeconds(Carbon::parse($attendance->mark_out));
+      }
+      return 0;
+    });
+    $totalEarnings = $attendances->sum('earning');
+
+    // Total time in days, hours, minutes, seconds
+    $totalTime = [
+      'days' => floor($totalSeconds / 86400),
+      'hours' => floor(($totalSeconds % 86400) / 3600),
+      'minutes' => floor(($totalSeconds % 3600) / 60),
+      'seconds' => $totalSeconds % 60,
+    ];
+
+    $totalHoursDecimal = $totalSeconds / 3600; // converts total seconds to hours
+    $totalHoursDecimal = round($totalHoursDecimal, 2); // round to 2 decimals
+
+
+    // Today's earning
+    $today = Carbon::today();
+    $todayEarnings = $attendances->where('mark_in', '>=', $today)->sum('earning');
+
+    // Latest session (running or completed)
+    $latestSession = $attendances->sortByDesc('mark_in')->first();
+
+    if ($latestSession) {
+      $markinTime = $latestSession->mark_in;
+      $markoutTime = $latestSession->mark_out;
+      $sessionStatus = $latestSession->mark_out ? 'completed' : 'running';
+    } else {
+      $sessionStatus = 'no session';
+      $markinTime = null;
+      $markoutTime = null;
+    }
+
+    // Total pickups
+    $totalPickups = VehiclePickup::count();
+
+    // Total drops
+    $totalDrops = VehiclePickup::whereHas('drop')->count();
+
+    // Today's pickups
+    $todaysPickups = VehiclePickup::whereDate('created_at', $today)->count();
+
+    // Today's drops
+    $todaysDrops = VehiclePickup::whereHas('drop', function ($q) use ($today) {
+      $q->whereDate('created_at', $today);
+    })->count();
+
+    return response()->json([
+      'status' => 'success',
+      'message' => 'Dashboard fetch completed',
+      'data' => array(
+        'employee' => $employee,
+        'totalEarnings' => $totalEarnings,
+        'markInTime' => $markinTime,
+        'markOutTime' => $markoutTime,
+        'totalHoursDecimal' => $totalHoursDecimal,
+        'sessionStatus' => $sessionStatus,
+        'totalPickups' => $totalPickups,
+        'totalDrops' => $totalDrops,
+        'todayPickups' => $todaysPickups,
+        'todaysDrops' => $todaysDrops
+      )
+    ]);
+  }
+
 
 }
