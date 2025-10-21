@@ -504,7 +504,7 @@ class EmployeeController extends Controller
       'status' => 'error',
       'message' => 'Invalid username or password.',
       'data' => null
-    ],400);
+    ], 400);
 
   }
 
@@ -512,60 +512,60 @@ class EmployeeController extends Controller
   {
 
     try {
-    $employee = Employee::find($request->id);
+      $employee = Employee::find($request->id);
 
-    // Prevent duplicate mark-in without mark-out
-    $existing = Attendance::where('employee_id', $employee->id)
-      ->whereNull('mark_out')
-      ->first();
+      // Prevent duplicate mark-in without mark-out
+      $existing = Attendance::where('employee_id', $employee->id)
+        ->whereNull('mark_out')
+        ->first();
 
-    if ($existing) {
-      return response()->json(['status' => 'error', 'message' => 'Already marked in. Please mark out first.'], 400);
-    }
-
-    // Get assigned mark-in location (with alias and lat/lng)
-    $employeeData = Employee::with('markInLocation')->find($employee->id);
-
-    // Get user current coordinates from mobile device
-    $userLat = floatval($request->latitude);
-    $userLng = floatval($request->longitude);
-
-    if ($employeeData && $employeeData->markInLocation) {
-
-      $location = $employeeData->markInLocation;
-
-      // Get assigned location coordinates
-      $locLat = floatval($location->latitude);
-      $locLng = floatval($location->longitude);
-
-      // Calculate distance using Haversine formula
-      $distanceKm = $this->haversineKm($userLat, $userLng, $locLat, $locLng);
-
-      // Define radius (in km)
-      $allowedRadiusKm = env('COVERAGE_RADIUS') / 100;
-
-      if ($distanceKm > $allowedRadiusKm) {
-        return response()->json([
-          'status' => 'error',
-          'message' => 'You are too far from the mark-in location (' . round($distanceKm * 1000) . ' meters away).',
-        ], 400);
+      if ($existing) {
+        return response()->json(['status' => 'error', 'message' => 'Already marked in. Please mark out first.'], 400);
       }
-    }
 
-    // Proceed to mark in if within radius
-    $attendance = Attendance::create([
-      'employee_id' => $employee->id,
-      'mark_in' => now(),
-      'in_latitude' => $userLat,
-      'in_longitude' => $userLng,
-      'hourly_rate' => $employee->hourly_rate,
-    ]);
+      // Get assigned mark-in location (with alias and lat/lng)
+      $employeeData = Employee::with('markInLocation')->find($employee->id);
 
-    return response()->json([
-      'status' => 'success',
-      'message' => 'Marked in successfully at location: ' . $location->alias,
-      'distanceKm' => round($distanceKm, 3),
-    ]);
+      // Get user current coordinates from mobile device
+      $userLat = floatval($request->latitude);
+      $userLng = floatval($request->longitude);
+
+      if ($employeeData && $employeeData->markInLocation) {
+
+        $location = $employeeData->markInLocation;
+
+        // Get assigned location coordinates
+        $locLat = floatval($location->latitude);
+        $locLng = floatval($location->longitude);
+
+        // Calculate distance using Haversine formula
+        $distanceKm = $this->haversineKm($userLat, $userLng, $locLat, $locLng);
+
+        // Define radius (in km)
+        $allowedRadiusKm = env('COVERAGE_RADIUS') / 100;
+
+        if ($distanceKm > $allowedRadiusKm) {
+          return response()->json([
+            'status' => 'error',
+            'message' => 'You are too far from the mark-in location (' . round($distanceKm * 1000) . ' meters away).',
+          ], 400);
+        }
+      }
+
+      // Proceed to mark in if within radius
+      $attendance = Attendance::create([
+        'employee_id' => $employee->id,
+        'mark_in' => now(),
+        'in_latitude' => $userLat,
+        'in_longitude' => $userLng,
+        'hourly_rate' => $employee->hourly_rate,
+      ]);
+
+      return response()->json([
+        'status' => 'success',
+        'message' => 'Marked in successfully at location: ' . $location->alias,
+        'distanceKm' => round($distanceKm, 3),
+      ]);
 
     } catch (\Exception $e) {
       return response()->json([
@@ -651,7 +651,7 @@ class EmployeeController extends Controller
 
   public function employeeProfile(Request $request)
   {
-    $employee = Employee::where('id',$request->id)->first();
+    $employee = Employee::where('id', $request->id)->first();
     return response()->json([
       'status' => 'success',
       'message' => 'Employee Profile Fetched',
@@ -727,7 +727,7 @@ class EmployeeController extends Controller
       'message' => 'Dashboard fetch completed',
       'data' => array(
         'employee' => $employee,
-        'totalEarnings' => number_format($totalEarnings,2),
+        'totalEarnings' => number_format($totalEarnings, 2),
         'markInTime' => $formattedMarkIn,
         'markOutTime' => $formattedMarkOut,
         'totalHoursDecimal' => $totalHoursDecimal,
@@ -736,9 +736,63 @@ class EmployeeController extends Controller
         'totalDrops' => $totalDrops,
         'todayPickups' => $todaysPickups,
         'todaysDrops' => $todaysDrops,
-        'todaysEarning' => number_format($todayEarnings,2)
+        'todaysEarning' => number_format($todayEarnings, 2)
       )
     ]);
+  }
+
+  function employeeReport(Request $request)
+  {
+    $id = $request->id();
+    $type = $request->type;
+    $from = $request->from;
+    $to = $request->to;
+    if (true) {
+
+      // Fetch attendances within range
+      $attendances = Attendance::where('employee_id', $id)
+        ->whereBetween('mark_in', [$from, $to])
+        ->orderBy('mark_in')
+        ->get();
+
+      // Group attendances by date
+      $dailyAttendances = $attendances->groupBy(function ($a) {
+        return $a->mark_in->format('Y-m-d');
+      });
+
+      $report = [];
+
+      foreach ($dailyAttendances as $date => $items) {
+        $totalHours = $items->sum('hour');
+        $totalEarnings = $items->sum('earning');
+        $firstIn = $items->min('mark_in')?->format('H:i') ?? '-';
+        $lastOut = $items->max('mark_out')?->format('H:i') ?? '-';
+
+        $report[] = [
+          'label' => $date,
+          'in' => $firstIn,
+          'out' => $lastOut,
+          'hours' => $totalHours,
+          'earnings' => $totalEarnings,
+          'deductions' => 0,
+          'days' => 1,
+        ];
+      }
+
+      // Totals
+      $totalHours = array_sum(array_column($report, 'hours'));
+      $totalEarnings = array_sum(array_column($report, 'earnings'));
+      $totalDays = array_sum(array_column($report, 'days'));
+
+      return response()->json([
+        'data' => $report,
+        'totalHours' => $totalHours,
+        'totalEarning' => $totalEarnings,
+        'totalDays' => $totalDays
+      ]);
+
+    }
+
   }
 
 
