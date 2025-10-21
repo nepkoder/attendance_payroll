@@ -785,7 +785,7 @@ class EmployeeController extends Controller
       $totalDays = array_sum(array_column($report, 'days'));
 
       return response()->json([
-        'data' => $report,
+        'attendance_report' => $report,
         'totalHours' => $totalHours,
         'totalEarning' => number_format($totalEarnings, 2),
         'totalDays' => $totalDays
@@ -799,7 +799,7 @@ class EmployeeController extends Controller
       $pickups = $query->latest()->get();
       // Summary
       $summary = [
-        'data' => $pickups,
+        'pd_report' => $pickups,
         'total_pickups' => $pickups->count(),
         'total_drops' => $pickups->where('drop')->count(),
       ];
@@ -807,7 +807,6 @@ class EmployeeController extends Controller
     }
 
     if ($type == 'Earnings') {
-// Get attendances for the employee in the date range
       $attendances = Attendance::where('employee_id', $id)
         ->whereBetween('mark_in', [$from, $to])
         ->orderBy('mark_in', 'asc')
@@ -832,7 +831,7 @@ class EmployeeController extends Controller
       });
 
       return response()->json([
-        'data' => $attendances,
+        'earning_report' => $attendances,
         ...$records
       ]);
 
