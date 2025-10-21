@@ -651,10 +651,11 @@ class EmployeeController extends Controller
 
   public function employeeProfile(Request $request)
   {
+    $employee = Employee::where('id',$request->id)->first();
     return response()->json([
       'status' => 'success',
       'message' => 'Employee Profile Fetched',
-      'data' => Employee::find($request->id)
+      'data' => $employee
     ]);
   }
 
