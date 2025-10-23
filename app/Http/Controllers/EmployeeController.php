@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class EmployeeController extends Controller
@@ -565,9 +566,11 @@ class EmployeeController extends Controller
         'status' => 'success',
         'message' => 'Marked in successfully at location: ' . $location->alias,
         'distanceKm' => round($distanceKm, 3),
+        'data' => $attendance
       ]);
 
     } catch (\Exception $e) {
+      Log::info('Error',['Error' => $e]);
       return response()->json([
         'status' => 'error',
         'message' => 'Failed to marked in: ERror ' . $e->getMessage(),
@@ -651,7 +654,7 @@ class EmployeeController extends Controller
 
   public function employeeProfile(Request $request)
   {
-    $employee = Employee::where('id', $request->id)->first();
+    $employee = Employee::with(['markInLocation','markOutLocation'])->where('id', $request->id)->first();
     return response()->json([
       'status' => 'success',
       'message' => 'Employee Profile Fetched',
@@ -676,13 +679,13 @@ class EmployeeController extends Controller
     });
     $totalEarnings = $attendances->sum('earning');
 
-    // Total time in days, hours, minutes, seconds
-    $totalTime = [
-      'days' => floor($totalSeconds / 86400),
-      'hours' => floor(($totalSeconds % 86400) / 3600),
-      'minutes' => floor(($totalSeconds % 3600) / 60),
-      'seconds' => $totalSeconds % 60,
-    ];
+//    // Total time in days, hours, minutes, seconds
+//    $totalTime = [
+//      'days' => floor($totalSeconds / 86400),
+//      'hours' => floor(($totalSeconds % 86400) / 3600),
+//      'minutes' => floor(($totalSeconds % 3600) / 60),
+//      'seconds' => $totalSeconds % 60,
+//    ];
 
     $totalHoursDecimal = $totalSeconds / 3600; // converts total seconds to hours
     $totalHoursDecimal = round($totalHoursDecimal, 2); // round to 2 decimals
@@ -697,7 +700,7 @@ class EmployeeController extends Controller
 
     if ($latestSession) {
       $markinTime = $latestSession->mark_in;
-      $markoutTime = $latestSession->mark_out;
+      $markoutTime = $latestSession->mark_out ?? '';
       $sessionStatus = $latestSession->mark_out ? 'completed' : 'running';
     } else {
       $sessionStatus = 'no session';
@@ -719,8 +722,10 @@ class EmployeeController extends Controller
       $q->whereDate('created_at', $today);
     })->count();
 
+    $formattedMarkOut = '-';
     $formattedMarkIn = date('d M Y, h:i A', strtotime($markinTime));
-    $formattedMarkOut = date('d M Y, h:i A', strtotime($markoutTime));
+    if($markoutTime)
+      $formattedMarkOut = date('d M Y, h:i A', strtotime($markoutTime));
 
     return response()->json([
       'status' => 'success',
@@ -772,7 +777,7 @@ class EmployeeController extends Controller
           'label' => $date,
           'in' => $firstIn,
           'out' => $lastOut,
-          'hours' => $totalHours,
+          'hours' => number_format($totalHours,2),
           'earnings' => number_format($totalEarnings, 2),
           'deductions' => 0,
           'days' => 1,
@@ -833,7 +838,7 @@ class EmployeeController extends Controller
       return response()->json([
         'earning_report' => $attendances,
         'total_earnings' => $records->sum('total_earnings'),
-        'total_hours' => $records->sum('total_hours'),
+        'total_hours' => number_format($records->sum('total_hours'),2),
         'total_deduction' => $records->sum('total_deductions'),
       ]);
 
