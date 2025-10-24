@@ -14,7 +14,7 @@ return new class extends Migration
       Schema::create('vehicle_pickups', function (Blueprint $table) {
         $table->id();
         $table->string('vehicle_number');
-        $table->string('camera_image')->nullable();
+//        $table->string('camera_image')->nullable();
         $table->json('images')->nullable();
         $table->text('remarks')->nullable();
         $table->foreignId('employee_id')->nullable()->constrained('employees')->onDelete('set null');

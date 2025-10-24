@@ -13,7 +13,6 @@ return new class extends Migration {
     Schema::create('vehicle_drops', function (Blueprint $table) {
       $table->id();
       $table->foreignId('pickup_id')->constrained('vehicle_pickups')->onDelete('cascade');
-      $table->string('camera_image')->nullable();
       $table->json('images')->nullable();
       $table->text('remarks')->nullable();
       $table->foreignId('employee_id')->nullable()->constrained('employees')->onDelete('set null');
