@@ -12,7 +12,7 @@
         <label class="block text-sm font-medium">Select Pickup</label>
         <select name="pickup_id" class="w-full p-3 border rounded-lg" required>
           <option value="">-- Select Pickup --</option>
-          @foreach($pickups as $pickup)
+          @foreach($pendingPickups as $pickup)
             <option value="{{ $pickup->id }}">{{ $pickup->vehicle_number }} ({{ $pickup->created_at->format('Y-m-d H:i') }})</option>
           @endforeach
         </select>

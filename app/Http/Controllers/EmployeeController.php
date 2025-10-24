@@ -115,7 +115,6 @@ class EmployeeController extends Controller
   {
     $pickups = VehiclePickup::with('drop')->latest()->get();
     $pendingPickups = VehiclePickup::doesntHave('drop')->get(); // ✅ only pickups without drop
-
     return view('employee.pickup', compact('pickups', 'pendingPickups'));
   }
 
@@ -123,6 +122,7 @@ class EmployeeController extends Controller
   {
     $pickups = VehiclePickup::with('drop')->latest()->get();
     $pendingPickups = VehiclePickup::doesntHave('drop')->get(); // ✅ only pickups without drop
+
     return view('employee.drop', compact('pickups', 'pendingPickups'));
   }
 

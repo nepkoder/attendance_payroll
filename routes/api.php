@@ -13,6 +13,7 @@ Route::post('/mobile/dashboard', [EmployeeController::class, 'employeeDasbhoardM
 Route::post('/mobile/report', [EmployeeController::class, 'employeeReport']);
 Route::post('/mobile/pickup', [VehicleEntryController::class, 'storePickupMobile']);
 Route::post('/mobile/drop', [VehicleEntryController::class, 'storeDropMobile']);
+Route::get('/mobile/pickups', [VehicleEntryController::class, 'pickupList']);
 
 
 

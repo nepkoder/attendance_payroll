@@ -11,6 +11,25 @@ use Illuminate\Support\Facades\Storage;
 
 class VehicleEntryController extends Controller
 {
+
+  public function pickupList() {
+    $pickups = VehiclePickup::whereDoesntHave('drop') // Only pickups with no drop
+    ->select('id', 'vehicle_number', 'created_at')
+      ->orderByDesc('created_at')
+      ->get();
+
+    $totalPickups = VehiclePickup::count();        // All pickups
+    $totalDrops   = VehicleDrop::count();          // All drops
+    $pendingPickups = VehiclePickup::whereDoesntHave('drop')->count(); // Pickups not dropped yet
+
+    return response()->json([
+      'total_pickups' => $totalPickups,
+      'total_drops' => $totalDrops,
+      'pending_pickups' => $pendingPickups,
+      'pickups' => $pickups
+    ]);
+  }
+
   // Show Pickup + Drop forms
   public function index()
   {
@@ -64,7 +83,6 @@ class VehicleEntryController extends Controller
     return redirect()->back()->with('success', 'Pickup entry saved successfully!');
   }
 
-
   // Store Drop Entry
   public function storeDrop(Request $request)
   {
@@ -110,37 +128,35 @@ class VehicleEntryController extends Controller
   {
     $request->validate([
       'vehicle_number' => 'required|string|max:50',
-      'camera_image' => 'nullable|string', // Base64 from hidden input
-      'images.*' => 'nullable|image',
-      'remarks' => 'nullable|string',
+      'remarks' => 'nullable|string|max:500',
+      'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
     ]);
 
-    $cameraPath = null;
-    if ($request->camera_image) {
-      // Decode base64 and store
-      $cameraData = $request->camera_image;
-      $cameraData = preg_replace('/^data:image\/\w+;base64,/', '', $cameraData);
-      $cameraData = str_replace(' ', '+', $cameraData);
-      $cameraPath = 'pickups/' . Str::random(10) . '.jpg';
-      Storage::disk('public')->put($cameraPath, base64_decode($cameraData));
-    }
+    $allImagePaths = [];
 
-    $imagePaths = [];
+    // Handle uploaded images
     if ($request->hasFile('images')) {
-      foreach ($request->file('images') as $image) {
-        $imagePaths[] = $image->store('pickups', 'public');
+      foreach ($request->file('images') as $file) {
+        if ($file->isValid()) {
+          $path = $file->store('pickups', 'public');
+          $allImagePaths[] = $path;
+        }
       }
     }
 
-    VehiclePickup::create([
-      'vehicle_number' => $request->vehicle_number,
-      'camera_image' => $cameraPath,
-      'images' => $imagePaths,
+    // Save to database
+    $pickup = VehiclePickup::create([
+      'vehicle_number' => strtoupper(trim($request->vehicle_number)),
+      'images' => $allImagePaths,
       'employee_id' => Auth::id(),
       'remarks' => $request->remarks,
     ]);
 
-    return response()->json(['status' => 'success', 'message' => 'Pickup entry saved successfully!']);
+    return response()->json([
+      'success' => true,
+      'message' => 'Pickup entry saved successfully!',
+      'data' => $pickup,
+    ], 200);
   }
 
   // Store Drop Entry
@@ -148,7 +164,6 @@ class VehicleEntryController extends Controller
   {
     $request->validate([
       'pickup_id' => 'required|exists:vehicle_pickups,id',
-      'camera_image' => 'nullable|string', // Base64 from hidden input
       'images.*' => 'nullable|image',
       'remarks' => 'nullable|string',
     ]);
@@ -158,26 +173,21 @@ class VehicleEntryController extends Controller
       return response()->json(['status' => 'error', 'message' => 'Drop entry already exists for this vehicle.'],400);
     }
 
-    $cameraPath = null;
-    if ($request->camera_image) {
-      $cameraData = $request->camera_image;
-      $cameraData = preg_replace('/^data:image\/\w+;base64,/', '', $cameraData);
-      $cameraData = str_replace(' ', '+', $cameraData);
-      $cameraPath = 'drops/' . Str::random(10) . '.jpg';
-      Storage::disk('public')->put($cameraPath, base64_decode($cameraData));
-    }
+    $allImagePaths = [];
 
-    $imagePaths = [];
+    // Handle uploaded images
     if ($request->hasFile('images')) {
-      foreach ($request->file('images') as $image) {
-        $imagePaths[] = $image->store('drops', 'public');
+      foreach ($request->file('images') as $file) {
+        if ($file->isValid()) {
+          $path = $file->store('pickups', 'public');
+          $allImagePaths[] = $path;
+        }
       }
     }
 
     VehicleDrop::create([
       'pickup_id' => $request->pickup_id,
-      'camera_image' => $cameraPath,
-      'images' => $imagePaths,
+      'images' => $allImagePaths,
       'remarks' => $request->remarks,
       'employee_id' => Auth::id(),
     ]);
