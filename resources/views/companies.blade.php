@@ -30,46 +30,72 @@
 @endif
 
 <!-- Add New Company Form -->
-  <div class="bg-white shadow rounded p-6 mb-8">
-    <h2 class="text-xl font-semibold mb-4">Add New Company</h2>
-    <form action="{{ route('companies.store') }}" method="POST" class="space-y-4">
-      @csrf
-      <div>
-        <label class="block text-gray-700">Company Name</label>
-        <input type="text" name="name" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+  <div class="bg-white shadow rounded p-6 mb-8 max-w-3xl mx-auto">
+    <h2 class="text-xl font-semibold mb-6">Add New Company</h2>
+
+    <form action="{{ route('companies.store') }}" method="POST" class="space-y-5">
+    @csrf
+
+    <!-- Company Details -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-gray-700 mb-1">Company Name</label>
+          <input type="text" name="name" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+        </div>
+
+        <div>
+          <label class="block text-gray-700 mb-1">Subdomain</label>
+          <input type="text" name="subdomain" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+        </div>
+
+        <div>
+          <label class="block text-gray-700 mb-1">Database Name</label>
+          <input type="text" name="db_name" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+        </div>
+
+        <div>
+          <label class="block text-gray-700 mb-1">Database Username</label>
+          <input type="text" name="db_username" value="root" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+        </div>
+
+        <div>
+          <label class="block text-gray-700 mb-1">Database Password</label>
+          <input type="password" name="db_password" value="password" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+        </div>
+
+        <div>
+          <label class="block text-gray-700 mb-1">Database Host</label>
+          <input type="text" name="db_host" value="127.0.0.1" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+        </div>
+
+        <div>
+          <label class="block text-gray-700 mb-1">Database Port</label>
+          <input type="number" name="db_port" value="3306" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+        </div>
       </div>
 
-      <div>
-        <label class="block text-gray-700">Subdomain</label>
-        <input type="text" name="subdomain" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+      <!-- Default Admin User Details -->
+      <div class="mt-6">
+        <h3 class="text-lg font-medium mb-3">Default Tenant Admin</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-gray-700 mb-1">Admin Name</label>
+            <input type="text" name="admin_name" value="Admin User" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+          </div>
+
+          <div>
+            <label class="block text-gray-700 mb-1">Admin Email</label>
+            <input type="email" name="admin_email" placeholder="admin@tenant.com" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+          </div>
+
+          <div>
+            <label class="block text-gray-700 mb-1">Admin Password</label>
+            <input type="password" name="admin_password" value="password" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+          </div>
+        </div>
       </div>
 
-      <div>
-        <label class="block text-gray-700">Database Name</label>
-        <input type="text" name="db_name" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-      </div>
-
-      <div>
-        <label class="block text-gray-700">Database Username</label>
-        <input type="text" name="db_username" value="root" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-      </div>
-
-      <div>
-        <label class="block text-gray-700">Database Password</label>
-        <input type="password" name="db_password" value="password" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-      </div>
-
-      <div>
-        <label class="block text-gray-700">Database Host</label>
-        <input type="text" name="db_host" value="127.0.0.1" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-      </div>
-
-      <div>
-        <label class="block text-gray-700">Database Port</label>
-        <input type="number" name="db_port" value="3306" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-      </div>
-
-      <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded">Create Company</button>
+      <button type="submit" class="mt-6 bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded font-medium">Create Company</button>
     </form>
   </div>
 

@@ -56,9 +56,10 @@ class CompanySetupController extends Controller
     ]);
 
     DB::connection($connectionName)->table('users')->insert([
-      'name' => 'Admin User',
-      'email' => 'admin',
-      'password' => Hash::make('admin'),
+      'name' => $request->admin_name ?? 'admin',
+      'email' => $request->admin_email ?? 'admin',
+      'username' => $request->admin_email ?? 'username',
+      'password' => Hash::make($request->admin_password),
       'created_at' => now(),
       'updated_at' => now(),
     ]);
