@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class CompanySetupController extends Controller
 {
@@ -53,6 +54,15 @@ class CompanySetupController extends Controller
       '--database'=>$connectionName,
       '--force'=>true
     ]);
+
+    DB::connection($connectionName)->table('users')->insert([
+      'name' => 'Admin User',
+      'email' => 'admin',
+      'password' => Hash::make('admin'),
+      'created_at' => now(),
+      'updated_at' => now(),
+    ]);
+    Config::set('database.default', env('DB_CONNECTION', 'mysql'));
 
     return redirect()->route('companies.index')->with('success','Company created successfully!');
   }
