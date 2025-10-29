@@ -6,6 +6,7 @@ use App\Http\Controllers\CompanySetupController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\VehicleEntryController;
+use App\Http\Middleware\DynamicDatabaseSwitcher;
 use App\Http\Middleware\GuardAuth;
 use Illuminate\Support\Facades\Route;
 
