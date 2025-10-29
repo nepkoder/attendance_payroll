@@ -16,6 +16,10 @@ class CompanySetupController extends Controller
     $companies = Company::all();
     return view('companies', compact('companies'));
   }
+  public function companyList() {
+    $companies = Company::all();
+    return response()->json($companies);
+  }
 
   public function store(Request $request)
   {
