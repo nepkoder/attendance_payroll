@@ -14,10 +14,12 @@ class DynamicDatabaseSwitcher
     $company = null;
 
     // Web: subdomain
-    if ($request->getHost()) {
-      $subdomain = explode('.', $request->getHost())[0];
-      $company = Company::where('subdomain', $subdomain)->first();
-    }
+//    if ($request->getHost()) {
+//      $subdomain = explode('.', $request->getHost())[0];
+//      $company = Company::where('subdomain', $subdomain)->first();
+//    }
+    $company = Company::find(1);
+
 
     // API: header
     if (!$company && $request->header('X-Company')) {

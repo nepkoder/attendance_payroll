@@ -10,6 +10,7 @@ use http\Client\Curl\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 
 class AdminController extends Controller
 {
@@ -28,16 +29,21 @@ class AdminController extends Controller
       'password' => 'required|string',
     ]);
 
-    $credentials = $request->only('username', 'password');
+    try {
+      $credentials = $request->only('username', 'password');
 
-    // Attempt login using username instead of email
-    if (Auth::guard('web')->attempt($credentials, $request->filled('remember'))) {
-      return redirect()->intended(route('admin.dashboard'));
+      // Attempt login using username instead of email
+      if (Auth::guard('web')->attempt($credentials, $request->filled('remember'))) {
+        return redirect()->intended(route('admin.dashboard'));
+      }
+
+      return back()->withErrors([
+        'username' => 'Invalid username or password.',
+      ])->onlyInput('username');
+    } catch (\Exception $e) {
+      Log::info("error",['Error' => $e]);
     }
 
-    return back()->withErrors([
-      'username' => 'Invalid username or password.',
-    ])->onlyInput('username');
   }
 
   public function logout(Request $request)
