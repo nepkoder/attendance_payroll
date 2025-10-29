@@ -2,12 +2,19 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\CompanySetupController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\VehicleEntryController;
 use App\Http\Middleware\GuardAuth;
 use Illuminate\Support\Facades\Route;
 
+
+Route::get('/companies', [CompanySetupController::class,'index'])->name('companies.index');
+Route::post('/companies', [CompanySetupController::class,'store'])->name('companies.store');
+Route::get('/companies/{id}/edit', [CompanySetupController::class,'edit'])->name('companies.edit');
+Route::put('/companies/{id}', [CompanySetupController::class,'update'])->name('companies.update');
+Route::delete('/companies/{id}', [CompanySetupController::class,'destroy'])->name('companies.destroy');
 // Main Page Route
 Route::get('/', [AdminController::class, 'showLoginForm'])->name('login');
 

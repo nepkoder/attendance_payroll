@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Company;
 use App\Models\User;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -14,13 +15,27 @@ class DatabaseSeeder extends Seeder
    */
   public function run(): void
   {
-    // User::factory(10)->create();
-
-    User::factory()->create([
-      'name' => 'Test User',
-      'email' => 'admin@gmail.com',
-      'username' => 'admin',
-      'password' => bcrypt('admin')
+    Company::insert([
+      [
+        'name' => 'UK Company',
+        'subdomain' => 'uk',
+        'db_name' => 'nepkoder',
+        'db_username' => 'root',
+        'db_password' => 'sujan123',
+        'db_host' => '127.0.0.1',
+        'db_port' => 3306,
+        'api_key' => 'uk123'
+      ],
+      [
+        'name' => 'US Company',
+        'subdomain' => 'us',
+        'db_name' => 'us_db',
+        'db_username' => 'root',
+        'db_password' => 'sujan123',
+        'db_host' => '127.0.0.1',
+        'db_port' => 3306,
+        'api_key' => 'us123'
+      ],
     ]);
   }
 }
