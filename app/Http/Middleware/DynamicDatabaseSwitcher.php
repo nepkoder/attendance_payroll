@@ -14,24 +14,23 @@ class DynamicDatabaseSwitcher
   {
     $company = null;
 
-    // Web: subdomain
-    if ($request->getHost()) {
-      $subdomain = explode('.', $request->getHost())[0];
-      $company = Company::where('subdomain', $subdomain)->first();
-    }
-
-    // API: header
-    if (!$company && $request->header('X-Company')) {
+    $isApiRequest = $request->expectsJson() || $request->is('api/*') || $request->header('X-Company');
+    if ($isApiRequest) {
+      // API: header
       $apiKey = $request->header('X-Company');
       $company = Company::where('api_key', $apiKey)->first();
+    } else {
+      // Web: subdomain
+      if ($request->getHost()) {
+        $subdomain = explode('.', $request->getHost())[0];
+        $company = Company::where('subdomain', $subdomain)->first();
+      }
     }
-
-    Log::info("Company",['Data' => $company]);
 
     // If company not found, return appropriate response
     if (!$company) {
       // Check if it's an API request (e.g., mobile app usually sends JSON)
-      if ($request->expectsJson() || $request->is('api/*')) {
+      if ($isApiRequest) {
         return response()->json([
           'success' => false,
           'message' => 'Invalid company or API key.'
