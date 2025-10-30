@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
 use App\Models\Company;
+use Illuminate\Support\Facades\Log;
 
 class DynamicDatabaseSwitcher
 {
@@ -24,6 +25,8 @@ class DynamicDatabaseSwitcher
       $apiKey = $request->header('X-Company');
       $company = Company::where('api_key', $apiKey)->first();
     }
+
+    Log::info("Company",['Data' => $company]);
 
     // If company not found, return appropriate response
     if (!$company) {
