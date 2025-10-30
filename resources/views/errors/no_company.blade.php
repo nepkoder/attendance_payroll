@@ -65,7 +65,7 @@
   <img class="illustration" src="https://cdn-icons-png.flaticon.com/512/4076/4076549.png" alt="Company Not Found">
   <h1>Company Not Found</h1>
   <p>Oops! The company you are looking for does not exist or has been removed. Please check the URL or try again.</p>
-  <a href="{{ url('/') }}" class="button">Go Back Home</a>
+{{--  <a href="{{ url('/') }}" class="button">Go Back Home</a>--}}
 </div>
 </body>
 </html>
