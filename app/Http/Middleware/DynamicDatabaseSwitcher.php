@@ -25,6 +25,20 @@ class DynamicDatabaseSwitcher
       $company = Company::where('api_key', $apiKey)->first();
     }
 
+    // If company not found, return appropriate response
+    if (!$company) {
+      // Check if it's an API request (e.g., mobile app usually sends JSON)
+      if ($request->expectsJson() || $request->is('api/*')) {
+        return response()->json([
+          'success' => false,
+          'message' => 'Invalid company or API key.'
+        ], 400);
+      }
+
+      // Web request
+      return response()->view('errors.company_not_found', [], 404);
+    }
+
     if ($company) {
       $connectionName = 'tenant_db';
 
