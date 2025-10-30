@@ -4,12 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Attendance;
 use App\Models\Employee;
+use App\Models\User;
 use App\Models\VehiclePickup;
 use Carbon\Carbon;
-use http\Client\Curl\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
 class AdminController extends Controller
@@ -32,9 +33,11 @@ class AdminController extends Controller
     try {
       $credentials = $request->only('username', 'password');
 
-      // Attempt login using username instead of email
-      if (Auth::guard('web')->attempt($credentials, $request->filled('remember'))) {
-        return redirect()->intended(route('admin.dashboard'));
+      $user = User::where('username', $request->username)->first();
+
+      if ($user && Hash::check($request->password, $user->password)) {
+        Auth::guard('web')->login($user, $request->filled('remember'));
+        return redirect()->intended(route('tenant.dashboard'));
       }
 
       return back()->withErrors([
