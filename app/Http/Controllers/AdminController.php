@@ -9,6 +9,7 @@ use App\Models\VehiclePickup;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -31,18 +32,19 @@ class AdminController extends Controller
     ]);
 
     try {
-      $credentials = $request->only('username', 'password');
-
       $user = User::where('username', $request->username)->first();
 
-      if ($user && Hash::check($request->password, $user->password)) {
+      $match = Hash::check($request->password, $user->password);
+
+      if ($user && $match) {
         Auth::guard('web')->login($user, $request->filled('remember'));
-        return redirect()->intended(route('tenant.dashboard'));
+        return redirect()->intended(route('admin.dashboard'));
       }
 
       return back()->withErrors([
         'username' => 'Invalid username or password.',
       ])->onlyInput('username');
+
     } catch (\Exception $e) {
       Log::info("error",['Error' => $e]);
     }

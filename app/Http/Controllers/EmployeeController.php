@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use App\Models\Employee;
 use App\Models\Location;
+use App\Models\User;
 use App\Models\VehiclePickup;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
@@ -335,16 +336,28 @@ class EmployeeController extends Controller
       'password' => 'required|string',
     ]);
 
-    $credentials = $request->only('username', 'password');
+    try {
+      // Fetch employee from tenant database
+      $employee = Employee::where('username', $request->username)->first();
 
-    if (Auth::guard('employee')->attempt($credentials, $request->filled('remember'))) {
+      if (!$employee) {
+        return back()->withErrors(['username' => 'User not found in tenant database.']);
+      }
+
+      // Verify password
+      if (!Hash::check($request->password, $employee->password)) {
+        return back()->withErrors(['password' => 'Incorrect password.']);
+      }
+
+      // Log in manually (since Auth::attempt might still be bound to master)
+      Auth::guard('employee')->login($employee, $request->filled('remember'));
+
       return redirect()->intended(route('employee.dashboard'));
+    } catch (\Exception $e) {
+      return back()->withErrors(['username' => 'Something went wrong while logging in.']);
     }
-
-    return back()->withErrors([
-      'username' => 'Invalid username or password.',
-    ])->onlyInput('username');
   }
+
 
 
   public function logout(Request $request)

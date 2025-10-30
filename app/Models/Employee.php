@@ -11,6 +11,8 @@ class Employee extends Authenticatable
 {
   use Notifiable, HasFactory;
 
+  protected $connection = 'tenant_db';
+
   protected $fillable = [
     'name', 'username', 'email', 'password', 'phone',
     'company', 'department', 'address', 'document_no',
