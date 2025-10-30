@@ -38,7 +38,7 @@ class DynamicDatabaseSwitcher
       }
 
       // Web request
-      return response()->view('errors.company_not_found', [], 404);
+      return response()->view('errors.no_company');
     }
 
     if ($company) {
