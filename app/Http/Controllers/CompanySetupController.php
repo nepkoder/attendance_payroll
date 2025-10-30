@@ -33,7 +33,11 @@ class CompanySetupController extends Controller
       'db_port'=>'required|integer',
     ]);
 
-    $company = Company::create($request->all());
+    $companyData = $request->all();
+    $apiKey = $companyData->subdomain;
+    $companyData['api_key'] = $apiKey;
+
+    $company = Company::create($companyData);
 
     // Create tenant database
     DB::statement("CREATE DATABASE IF NOT EXISTS `{$company->db_name}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
