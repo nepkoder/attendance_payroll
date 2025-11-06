@@ -9,6 +9,7 @@ use App\Http\Controllers\VehicleEntryController;
 use App\Http\Middleware\DynamicDatabaseSwitcher;
 use App\Http\Middleware\GuardAuth;
 use Illuminate\Support\Facades\Route;
+use Rap2hpoutre\LaravelLogViewer\LogViewerController;
 
 
 Route::get('/companies', [CompanySetupController::class, 'index'])->name('companies.index');
@@ -57,6 +58,8 @@ Route::middleware([DynamicDatabaseSwitcher::class])->group(function () {
 
       Route::get('/setting', [AdminController::class, 'setting'])->name('admin.setting');
       Route::post('/update-setting', [AdminController::class, 'updateSetting'])->name('settings.update');
+
+      Route::get('/logs', [LogViewerController::class, 'index'])->name('logs');
 
     });
 
