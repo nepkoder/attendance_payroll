@@ -716,7 +716,7 @@ class EmployeeController extends Controller
       $markoutTime = $latestSession->mark_out ?? '';
       $sessionStatus = $latestSession->mark_out ? 'completed' : 'running';
     } else {
-      $sessionStatus = 'no session';
+      $sessionStatus = 'nosession';
       $markinTime = null;
       $markoutTime = null;
     }
