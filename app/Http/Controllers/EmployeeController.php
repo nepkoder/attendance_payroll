@@ -812,17 +812,39 @@ class EmployeeController extends Controller
     }
 
     if ($type == 'Pickup & Drop') {
-      $query = VehiclePickup::with('drop');
-      $query->whereBetween('created_at', [$from, $to]);
+      $query = VehiclePickup::with('drop')
+        ->whereBetween('created_at', [$from, $to]);
+
       $pickups = $query->latest()->get();
+
+      // Map images for pickup and drop
+      $pickups->transform(function ($pickup) {
+
+        // Convert pickup images
+        if ($pickup->images && is_array($pickup->images)) {
+          $pickup->images = array_map(fn($img) => asset("storage/$img"), $pickup->images);
+        }
+
+        // Convert drop images if drop exists
+        if ($pickup->drop) {
+          if ($pickup->drop->images && is_array($pickup->drop->images)) {
+            $pickup->drop->images = array_map(fn($img) => asset("storage/$img"), $pickup->drop->images);
+          }
+        }
+
+        return $pickup;
+      });
+
       // Summary
       $summary = [
         'pd_report' => $pickups,
         'total_pickups' => $pickups->count(),
         'total_drops' => $pickups->where('drop')->count(),
       ];
+
       return response()->json($summary);
     }
+
 
     if ($type == 'Earnings') {
       $attendances = Attendance::where('employee_id', $id)
