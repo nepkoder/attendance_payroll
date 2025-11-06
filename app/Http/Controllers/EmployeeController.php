@@ -812,7 +812,7 @@ class EmployeeController extends Controller
     }
 
     if ($type == 'Pickup & Drop') {
-      $query = VehiclePickup::with('drop.pickup');
+      $query = VehiclePickup::with('drop');
       $query->whereBetween('created_at', [$from, $to]);
       $pickups = $query->latest()->get();
       // Summary
