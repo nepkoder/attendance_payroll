@@ -34,8 +34,6 @@ class CompanySetupController extends Controller
     ]);
 
     $companyData = $request->all();
-    $apiKey = $companyData->subdomain;
-    $companyData['api_key'] = $apiKey;
 
     $company = Company::create($companyData);
 
