@@ -577,7 +577,7 @@ class EmployeeController extends Controller
 
       return response()->json([
         'status' => 'success',
-        'message' => 'Marked in successfully at location: ' . $location->alias,
+        'message' => 'Marked in successfully',
         'distanceKm' => round($distanceKm, 3),
         'data' => $attendance
       ]);
