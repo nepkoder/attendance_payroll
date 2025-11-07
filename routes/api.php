@@ -19,6 +19,6 @@ Route::middleware([DynamicDatabaseSwitcher::class])->group(function () {
   Route::post('/mobile/drop', [VehicleEntryController::class, 'storeDropMobile']);
   Route::get('/mobile/pickups', [VehicleEntryController::class, 'pickupList']);
 
-  Route::get('/mobile/upload', [VehicleEntryController::class, 'uploadImage']);
+  Route::post('/mobile/upload', [VehicleEntryController::class, 'uploadImage']);
 
 });
