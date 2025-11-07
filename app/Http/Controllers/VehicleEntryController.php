@@ -195,5 +195,28 @@ class VehicleEntryController extends Controller
     return response()->json(['status' => 'success', 'message' => 'Drop entry saved successfully!']);
   }
 
+  public function uploadImage(Request $request) {
+
+    if ($request->hasFile('image')) {
+      $file = $request->file('image');
+
+        if ($file->isValid()) {
+
+          $type = $request->type;
+          $storeFolder= 'upload';
+
+          if ($type == 'PICKUP')
+            $storeFolder = 'pickups';
+          if($type == 'DROPOFF')
+            $storeFolder = 'dropoff';
+
+          $path = $file->store($storeFolder, 'public');
+
+          return response()->json(['status' => 'success', 'message' => 'Image uploaded successfully!', 'data'=> $path]);
+        }
+    }
+
+  }
+
 
 }
