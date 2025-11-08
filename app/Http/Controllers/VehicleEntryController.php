@@ -129,25 +129,25 @@ class VehicleEntryController extends Controller
     $request->validate([
       'vehicle_number' => 'required|string|max:50',
       'remarks' => 'nullable|string|max:500',
-      'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+//      'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
     ]);
 
-    $allImagePaths = [];
-
-    // Handle uploaded images
-    if ($request->hasFile('images')) {
-      foreach ($request->file('images') as $file) {
-        if ($file->isValid()) {
-          $path = $file->store('pickups', 'public');
-          $allImagePaths[] = $path;
-        }
-      }
-    }
+//    $allImagePaths = [];
+//
+//    // Handle uploaded images
+//    if ($request->hasFile('images')) {
+//      foreach ($request->file('images') as $file) {
+//        if ($file->isValid()) {
+//          $path = $file->store('pickups', 'public');
+//          $allImagePaths[] = $path;
+//        }
+//      }
+//    }
 
     // Save to database
     $pickup = VehiclePickup::create([
       'vehicle_number' => strtoupper(trim($request->vehicle_number)),
-      'images' => $allImagePaths,
+      'images' => $request->images,
       'employee_id' => $request->id ?? null,
       'remarks' => $request->remarks,
     ]);
@@ -164,7 +164,7 @@ class VehicleEntryController extends Controller
   {
     $request->validate([
       'pickup_id' => 'required|exists:vehicle_pickups,id',
-      'images.*' => 'nullable|image',
+//      'images.*' => 'nullable|image',
       'remarks' => 'nullable|string',
     ]);
 
@@ -172,22 +172,22 @@ class VehicleEntryController extends Controller
     if (VehicleDrop::where('pickup_id', $request->pickup_id)->exists()) {
       return response()->json(['status' => 'error', 'message' => 'Drop entry already exists for this vehicle.'],400);
     }
-
-    $allImagePaths = [];
-
-    // Handle uploaded images
-    if ($request->hasFile('images')) {
-      foreach ($request->file('images') as $file) {
-        if ($file->isValid()) {
-          $path = $file->store('pickups', 'public');
-          $allImagePaths[] = $path;
-        }
-      }
-    }
+//
+//    $allImagePaths = [];
+//
+//    // Handle uploaded images
+//    if ($request->hasFile('images')) {
+//      foreach ($request->file('images') as $file) {
+//        if ($file->isValid()) {
+//          $path = $file->store('pickups', 'public');
+//          $allImagePaths[] = $path;
+//        }
+//      }
+//    }
 
     VehicleDrop::create([
       'pickup_id' => $request->pickup_id,
-      'images' => $allImagePaths,
+      'images' => $request->images,
       'remarks' => $request->remarks,
       'employee_id' => $request->id ?? null,
     ]);
