@@ -214,7 +214,7 @@ class VehicleEntryController extends Controller
 
           // ✅ Generate a custom filename
           $extension = $file->getClientOriginalExtension();
-          $filename = $company . '_' . '_' . time() . '.' . $extension;
+          $filename = $company . '_' . time() . '.' . $extension;
 
           // ✅ Store file with custom name
           $path = $file->storeAs($storeFolder, $filename, 'public');
