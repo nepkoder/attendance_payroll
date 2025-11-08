@@ -210,7 +210,14 @@ class VehicleEntryController extends Controller
           if($type == 'DROPOFF')
             $storeFolder = 'dropoff';
 
-          $path = $file->store($storeFolder, 'public');
+          $company = $request->header('X-Company') ?? '';
+
+          // ✅ Generate a custom filename
+          $extension = $file->getClientOriginalExtension();
+          $filename = $company . '_' . '_' . time() . '.' . $extension;
+
+          // ✅ Store file with custom name
+          $path = $file->storeAs($storeFolder, $filename, 'public');
 
           return response()->json(['status' => 'success', 'message' => 'Image uploaded successfully!', 'data'=> $path]);
         }
