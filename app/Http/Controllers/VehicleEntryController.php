@@ -153,7 +153,7 @@ class VehicleEntryController extends Controller
     ]);
 
     return response()->json([
-      'success' => true,
+      'status' => 'success',
       'message' => 'Pickup entry saved successfully!',
       'data' => $pickup,
     ], 200);

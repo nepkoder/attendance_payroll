@@ -812,8 +812,13 @@ class EmployeeController extends Controller
     }
 
     if ($type == 'Pickup & Drop') {
+
       $query = VehiclePickup::with('drop')
-        ->whereBetween('created_at', [$from, $to]);
+        ->whereBetween('created_at', [
+          Carbon::parse($from)->startOfDay(),
+          Carbon::parse($to)->addDay()->endOfDay()
+        ]);
+
 
       $pickups = $query->latest()->get();
 
