@@ -510,7 +510,8 @@ class EmployeeController extends Controller
       return response()->json([
         'status' => 'success',
         'message' => 'Login success',
-        'data' => $employee
+        'data' => $employee,
+        'imageCompress' => env('IMAGE_COMPRESS') ?? false
       ]);
     }
 
