@@ -6,6 +6,7 @@ use App\Models\VehicleDrop;
 use App\Models\VehiclePickup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 
@@ -167,6 +168,8 @@ class VehicleEntryController extends Controller
 //      'images.*' => 'nullable|image',
       'remarks' => 'nullable|string',
     ]);
+
+    Log::info("Req Data",['data' => $request->all()]);
 
     // Prevent duplicate drop entry for same pickup
     if (VehicleDrop::where('pickup_id', $request->pickup_id)->exists()) {
