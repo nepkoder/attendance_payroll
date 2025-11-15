@@ -13,6 +13,7 @@ class VehicleDrop extends Model
     'pickup_id',
     'camera_image',
     'images',
+    'employee_id',
     'remarks',
   ];
 

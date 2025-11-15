@@ -14,6 +14,7 @@ class VehiclePickup extends Model
     'camera_image',
     'images',
     'remarks',
+    'employee_id'
   ];
 
   protected $casts = [
