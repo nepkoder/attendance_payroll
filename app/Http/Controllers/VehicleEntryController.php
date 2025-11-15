@@ -149,7 +149,7 @@ class VehicleEntryController extends Controller
     $pickup = VehiclePickup::create([
       'vehicle_number' => strtoupper(trim($request->vehicle_number)),
       'images' => $request->images,
-      'employee_id' => $request->id ?? null,
+      'employee_id' => $request->employee_id ?? null,
       'remarks' => $request->remarks,
     ]);
 
@@ -192,7 +192,7 @@ class VehicleEntryController extends Controller
       'pickup_id' => $request->pickup_id,
       'images' => $request->images,
       'remarks' => $request->remarks,
-      'employee_id' => $request->id ?? null,
+      'employee_id' => $request->employee_id ?? null,
     ]);
 
     return response()->json(['status' => 'success', 'message' => 'Drop entry saved successfully!']);
