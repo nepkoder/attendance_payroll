@@ -57,8 +57,13 @@
                 @if(!empty($pickup->image_urls))
                   <div class="d-flex gap-2 flex-wrap">
                     @foreach($pickup->image_urls as $img)
-                      <img src="{{ $img }}" class="rounded" width="60" height="60" style="object-fit: cover;">
+                      <img src="{{ $img }}"
+                           onclick="showImage('{{ $img }}')"
+                           class="rounded cursor-pointer"
+                           width="60" height="60"
+                           style="object-fit: cover;">
                     @endforeach
+
                   </div>
                 @else
                   -
@@ -80,8 +85,13 @@
                 @if(!empty($pickup->drop?->image_urls))
                   <div class="d-flex gap-2 flex-wrap">
                     @foreach($pickup->drop->image_urls as $dimg)
-                      <img src="{{ $dimg }}" class="rounded" width="60" height="60" style="object-fit: cover;">
+                      <img src="{{ $dimg }}"
+                           onclick="showImage('{{ $dimg }}')"
+                           class="rounded cursor-pointer"
+                           width="60" height="60"
+                           style="object-fit: cover;">
                     @endforeach
+
                   </div>
                 @else
                   -
@@ -109,4 +119,25 @@
     </div>
 
   </div>
+
+  <!-- Image Preview Modal -->
+  <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-body p-0">
+          <img id="modalImage" src="" class="w-100" style="object-fit: contain;">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showImage(src) {
+      document.getElementById('modalImage').src = src;
+      var myModal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
+      myModal.show();
+    }
+  </script>
+
+
 @endsection
