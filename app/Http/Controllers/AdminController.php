@@ -148,11 +148,15 @@ class AdminController extends Controller
       Carbon::parse($p->created_at)->between($from->startOfDay(), $to->endOfDay())
       );
 
+      $emp->filtered_drops = $emp->drop->filter(fn($p) =>
+      Carbon::parse($p->created_at)->between($from->startOfDay(), $to->endOfDay())
+      );
+
       // Calculate totals per employee
       $emp->total_hours = $emp->filtered_attendances->sum('hour');
       $emp->total_earnings = $emp->filtered_attendances->sum('earning');
       $emp->total_pickups = $emp->filtered_pickups->count();
-      $emp->total_drops = $emp->filtered_pickups->filter(fn($p) => $p->drop)->count();
+      $emp->total_drops = $emp->filtered_drops->count();
       $emp->mark_in_count = $emp->filtered_attendances->filter(fn($att) => $att->mark_in)->count();
       $emp->mark_out_count = $emp->filtered_attendances->filter(fn($att) => $att->mark_out)->count();
     }
