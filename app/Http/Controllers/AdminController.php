@@ -185,6 +185,54 @@ class AdminController extends Controller
     return view('admin.attendance-report', compact('attendances', 'summary', 'view'));
   }
 
+  public function pickupDropoffReport(Request $request)
+  {
+    // Parse dates
+    $from = $request->filled('from')
+      ? Carbon::parse($request->from)
+      : Carbon::today();
+
+    $to = $request->filled('to')
+      ? Carbon::parse($request->to)
+      : Carbon::today();
+
+    // Query pickups with dropoff
+    $pickups = VehiclePickup::with('drop')
+      ->whereBetween('created_at', [
+        $from->copy()->startOfDay(),
+        $to->copy()->endOfDay()
+      ])
+      ->latest()
+      ->get();
+
+    // Map image URLs
+    $pickups->transform(function ($pickup) {
+
+      // Pickup images
+      if (is_array($pickup->images)) {
+        $pickup->image_urls = collect($pickup->images)
+          ->map(fn($img) => asset("storage/{$img}"))
+          ->toArray();
+      } else {
+        $pickup->image_urls = [];
+      }
+
+      // Dropoff images
+      if ($pickup->drop && is_array($pickup->drop->images)) {
+        $pickup->drop->image_urls = collect($pickup->drop->images)
+          ->map(fn($img) => asset("storage/{$img}"))
+          ->toArray();
+      } else if ($pickup->drop) {
+        $pickup->drop->image_urls = [];
+      }
+
+      return $pickup;
+    });
+
+    return view('admin.pickupdropoff-report', compact('pickups', 'from', 'to'));
+  }
+
+
   public function employeeSummary(Request $request, $employeeId)
   {
     $from = $request->get('from') ? Carbon::parse($request->from) : Carbon::today();

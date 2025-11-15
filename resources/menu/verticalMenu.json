@@ -71,6 +71,12 @@
       "slug": "attendance-report"
     },
     {
+      "name": "Pickup/Dropoff Report",
+      "icon": "menu-icon icon-base bx bx-bar-chart-alt-2",
+      "slug": "pikcup-dropoff-report",
+      "url": "admin/pickup-dropoff-report"
+    },
+    {
       "url": "admin/setting",
       "icon": "menu-icon icon-base bx bx-cog",
       "name": "Settings",

@@ -26,6 +26,7 @@ class DynamicDatabaseSwitcher
         $company = Company::where('subdomain', $subdomain)->first();
       }
     }
+//    $company = Company::first(); // for testing
 
     // If company not found, return appropriate response
     if (!$company) {

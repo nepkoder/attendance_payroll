@@ -22,7 +22,7 @@
 
       <!-- Summary Cards Grid -->
       <!-- Summary Cards Grid with Row & Column separation -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+      <div class="d-flex flex-row grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         <div class="bg-white rounded-2xl shadow p-6 text-center hover:scale-105 transition transform duration-200">
           <div class="text-slate-500 font-semibold">Total Employees</div>
           <div class="text-3xl font-bold text-slate-800 mt-2">{{ $summary['total_employees'] ?? 0 }}</div>

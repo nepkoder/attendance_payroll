@@ -17,7 +17,7 @@
     </div>
 
     {{-- Summary Cards --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+    <div class="flex-row d-flex mb-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
       @php
         $cards = [
             ['label' => 'Total Hours', 'value' => $summary['total_hours'], 'icon' => '⏱', 'color' => 'bg-indigo-100 text-indigo-800'],
