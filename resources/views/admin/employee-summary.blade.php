@@ -63,8 +63,8 @@
             <td class="p-3 text-right">£{{ number_format($att->earning ?? 0,2) }}</td>
 {{--            <td class="p-3">{{ $att->markInLocation->alias ?? '-' }}</td>--}}
 {{--            <td class="p-3">{{ $att->markOutLocation->alias ?? '-' }}</td>--}}
-            <td class="p-3">{{ $att->markInLocations->pluck('alias')->join(', ') }}</td>
-            <td class="p-3">{{ $att->markOutLocations->pluck('alias')->join(', ') }}</td>
+            <td class="p-3">{{ isset($att->markInLocations) ? $att->markInLocations->pluck('alias')->join(', ') : '' }}</td>
+            <td class="p-3">{{ isset($att->markOutLocations) ? $att->markOutLocations->pluck('alias')->join(', ') : '' }}</td>
 
           </tr>
         @empty
