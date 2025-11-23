@@ -372,7 +372,7 @@ class EmployeeController extends Controller
 
   public function index()
   {
-    $employees = Employee::with(['markInLocation', 'markOutLocation'])->latest()->get();
+    $employees = Employee::with(['markInLocations', 'markOutLocations'])->latest()->get();
     return view('employee.index', compact('employees'));
   }
 
@@ -397,30 +397,42 @@ class EmployeeController extends Controller
       'status' => 'required|in:active,inactive',
       'image' => 'nullable|image|mimes:jpg,png,jpeg',
       'document_image' => 'nullable|file|mimes:pdf,jpg,png,jpeg',
-      'mark_in_location_id' => 'nullable|exists:locations,id',
-      'mark_out_location_id' => 'nullable|exists:locations,id'
+      // validate arrays
+      'mark_in_location_id' => 'nullable|array',
+      'mark_in_location_id.*' => 'exists:locations,id',
+      'mark_out_location_id' => 'nullable|array',
+      'mark_out_location_id.*' => 'exists:locations,id',
     ]);
 
-    $data = $request->except(['image', 'document_image']);
-    $data['password'] = Hash::make($request->password);
+    $employeeData = $request->except(['image', 'document_image', 'mark_in_location_id', 'mark_out_location_id']);
+    $employeeData['password'] = Hash::make($request->password);
 
-    // handle image upload
+
     if ($request->hasFile('image')) {
-      $data['image'] = $request->file('image')->store('employees', 'public');
+      $employeeData['image'] = $request->file('image')->store('employees', 'public');
     }
 
     if ($request->hasFile('document_image')) {
-      $data['document_image'] = $request->file('document_image')->store('employee_docs', 'public');
+      $employeeData['document_image'] = $request->file('document_image')->store('employee_docs', 'public');
     }
 
-    Employee::create($data);
+    $employee = Employee::create($employeeData);
+
+    // attach multi locations
+    if ($request->mark_in_location_id) {
+      $employee->markInLocations()->attach($request->mark_in_location_id);
+    }
+
+    if ($request->mark_out_location_id) {
+      $employee->markOutLocations()->attach($request->mark_out_location_id);
+    }
 
     return redirect()->route('employee.index')->with('success', 'Employee created successfully.');
   }
 
   public function show($id)
   {
-    $employee = Employee::with(['markInLocation', 'markOutLocation'])->findOrFail($id);
+    $employee = Employee::with(['markInLocations', 'markOutLocations'])->findOrFail($id);
     return view('employee.view', compact('employee'));
   }
 
@@ -444,12 +456,21 @@ class EmployeeController extends Controller
       'status' => 'required|in:active,inactive',
       'image' => 'nullable|image|mimes:jpg,png,jpeg',
       'document_image' => 'nullable|file|mimes:pdf,jpg,png,jpeg',
-      'mark_in_location_id' => 'nullable|exists:locations,id',
-      'mark_out_location_id' => 'nullable|exists:locations,id',
-      'hourly_rate' => 'nullable'
+      'hourly_rate' => 'nullable',
+      'mark_in_location_id' => 'nullable|array',
+      'mark_in_location_id.*' => 'exists:locations,id',
+      'mark_out_location_id' => 'nullable|array',
+      'mark_out_location_id.*' => 'exists:locations,id',
     ]);
 
-    $data = $request->except(['image', 'document_image', 'password']);
+    $data = $request->except([
+      'image',
+      'password',
+      'document_image',
+      'mark_in_location_id',
+      'mark_out_location_id',
+    ]);
+
     if ($request->filled('password')) {
       $data['password'] = Hash::make($request->password);
     }
@@ -463,6 +484,9 @@ class EmployeeController extends Controller
     }
 
     $employee->update($data);
+    // ⭐ Sync locations (attach/detach automatically)
+    $employee->markInLocations()->sync($request->mark_in_location_id ?? []);
+    $employee->markOutLocations()->sync($request->mark_out_location_id ?? []);
 
     return redirect()->route('employee.index')->with('success', 'Employee updated successfully.');
   }

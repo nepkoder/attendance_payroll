@@ -4,6 +4,10 @@
 
 @section('content')
 
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+
   <div class="card">
     <div class="card-header d-flex align-items-center justify-content-between">
       <h5 class="mb-0">Edit Employee - {{ $employee->name }}</h5>
@@ -78,27 +82,30 @@
             </div>
 
             <div class="mb-3">
-              <label for="mark_in_location_id" class="form-label">Mark In Location</label>
-              <select name="mark_in_location_id" id="mark_in_location_id" class="form-select">
-                <option value="">-- Select Location --</option>
+              <label class="form-label">Mark In Locations</label>
+              <select name="mark_in_location_id[]" id="markIn" multiple>
                 @foreach($locations as $loc)
-                  <option value="{{ $loc->id }}" {{ $employee->mark_in_location_id == $loc->id ? 'selected' : '' }}>
+                  <option value="{{ $loc->id }}"
+                    {{ $employee->markInLocations->contains($loc->id) ? 'selected' : '' }}>
                     {{ $loc->alias }}
                   </option>
                 @endforeach
               </select>
             </div>
+
             <div class="mb-3">
-              <label for="mark_out_location_id" class="form-label">Mark Out Location</label>
-              <select name="mark_out_location_id" id="mark_out_location_id" class="form-select">
-                <option value="">-- Select Location --</option>
+              <label class="form-label">Mark Out Locations</label>
+              <select name="mark_out_location_id[]" id="markOut" multiple>
                 @foreach($locations as $loc)
-                  <option value="{{ $loc->id }}" {{ $employee->mark_out_location_id == $loc->id ? 'selected' : '' }}>
+                  <option value="{{ $loc->id }}"
+                    {{ $employee->markOutLocations->contains($loc->id) ? 'selected' : '' }}>
                     {{ $loc->alias }}
                   </option>
                 @endforeach
               </select>
             </div>
+
+
           </div>
 
           <!-- Right Column -->
@@ -201,5 +208,17 @@
       </form>
     </div>
   </div>
+
+  <script>
+    new Choices('#markIn', {
+      removeItemButton: true,
+      searchPlaceholderValue: 'Search mark-in locations...',
+    });
+
+    new Choices('#markOut', {
+      removeItemButton: true,
+    });
+  </script>
+
 
 @endsection

@@ -35,6 +35,23 @@ return new class extends Migration
 
           $table->timestamps();
         });
+
+      // mark_in_locations migration
+      Schema::create('employee_mark_in_locations', function (Blueprint $table) {
+        $table->id();
+        $table->foreignId('employee_id')->constrained('employees')->onDelete('cascade');
+        $table->foreignId('location_id')->constrained('locations')->onDelete('cascade');
+        $table->timestamps();
+      });
+
+// mark_out_locations migration
+      Schema::create('employee_mark_out_locations', function (Blueprint $table) {
+        $table->id();
+        $table->foreignId('employee_id')->constrained('employees')->onDelete('cascade');
+        $table->foreignId('location_id')->constrained('locations')->onDelete('cascade');
+        $table->timestamps();
+      });
+
     }
 
     /**

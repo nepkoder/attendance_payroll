@@ -133,8 +133,8 @@ class AdminController extends Controller
       'attendances',
       'pickups',
       'drop',
-      'markInLocation',
-      'markOutLocation'
+      'markInLocations',
+      'markOutLocations'
     ])->get();
 
     foreach ($employees as $emp) {
@@ -246,8 +246,8 @@ class AdminController extends Controller
       'attendances',
       'pickups',
       'drop',
-      'markInLocation',
-      'markOutLocation'
+      'markInLocations',
+      'markOutLocations'
     ])->findOrFail($employeeId);
 
     // Filter attendances

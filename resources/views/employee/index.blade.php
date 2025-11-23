@@ -42,8 +42,8 @@
                 </div>
               </td>
               <td>£ {{ $emp->hourly_rate ?? '0' }}</td>
-              <td>{{ $emp->markInLocation?->alias ?? '-' }}</td>
-              <td>{{ $emp->markOutLocation?->alias ?? '-' }}</td>
+              <td>{{ $emp->markInLocations->pluck('alias')->join(', ') }}</td>
+              <td>{{ $emp->markOutLocations->pluck('alias')->join(', ') }}</td>
               <td>
                 @if($emp->status == 'active')
                   <span class="badge bg-success">Active</span>

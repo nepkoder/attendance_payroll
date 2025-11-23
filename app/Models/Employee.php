@@ -16,8 +16,7 @@ class Employee extends Authenticatable
   protected $fillable = [
     'name', 'username', 'email', 'password', 'phone',
     'company', 'department', 'address', 'document_no',
-    'document_image', 'image', 'remarks','status', 'hourly_rate',
-    'mark_in_location_id', 'mark_out_location_id',
+    'document_image', 'image', 'remarks','status', 'hourly_rate'
   ];
 
   public function attendances()
@@ -36,13 +35,25 @@ class Employee extends Authenticatable
   }
 
   // Relations
-  public function markInLocation()
+//  public function markInLocation()
+//  {
+//    return $this->belongsTo(Location::class, 'mark_in_location_id');
+//  }
+//
+//  public function markOutLocation()
+//  {
+//    return $this->belongsTo(Location::class, 'mark_out_location_id');
+//  }
+
+  public function markInLocations()
   {
-    return $this->belongsTo(Location::class, 'mark_in_location_id');
+    return $this->belongsToMany(Location::class, 'employee_mark_in_locations');
   }
 
-  public function markOutLocation()
+  public function markOutLocations()
   {
-    return $this->belongsTo(Location::class, 'mark_out_location_id');
+    return $this->belongsToMany(Location::class, 'employee_mark_out_locations');
   }
+
+
 }

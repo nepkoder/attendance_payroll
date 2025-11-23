@@ -26,29 +26,43 @@ class AttendanceController extends Controller
     }
 
     // Get assigned mark-in location (with alias and lat/lng)
-    $employeeData = Employee::with('markInLocation')->find($employee->id);
+    $employeeData = Employee::with('markInLocations')->find($employee->id);
 
     // Get user current coordinates from mobile device
     $userLat = floatval($request->latitude);
     $userLng = floatval($request->longitude);
 
-    if ($employeeData && $employeeData->markInLocation) {
+    $allowedRadiusKm = env('COVERAGE_RADIUS') / 100;
 
-      $location = $employeeData->markInLocation;
 
-      // Get assigned location coordinates
-      $locLat = floatval($location->latitude);
-      $locLng = floatval($location->longitude);
+    // If user has assigned mark-in locations
+    if ($employeeData && $employeeData->markInLocations->count()) {
 
-      // Calculate distance using Haversine formula
-      $distanceKm = $this->haversineKm($userLat, $userLng, $locLat, $locLng);
+      $withinRange = false;
+      $distanceMessage = [];
 
-      // Define radius (in km)
-      $allowedRadiusKm = env('COVERAGE_RADIUS') / 100;
+      foreach ($employeeData->markInLocations as $location) {
 
-      if ($distanceKm > $allowedRadiusKm) {
+        $locLat = floatval($location->latitude);
+        $locLng = floatval($location->longitude);
+
+        // Calculate distance
+        $distanceKm = $this->haversineKm($userLat, $userLng, $locLat, $locLng);
+
+        // Collect distances to show if needed
+        $distanceMessage[] = $location->alias . ': ' . round($distanceKm * 1000) . 'm';
+
+        // If within allowed radius → success
+        if ($distanceKm <= $allowedRadiusKm) {
+          $withinRange = true;
+          break;
+        }
+      }
+
+      // If NOT within range of ANY location
+      if (!$withinRange) {
         return response()->json([
-          'error' => 'You are too far from the mark-in location (' . round($distanceKm * 1000) . ' meters away).',
+          'error' => 'You are too far from all mark-in locations. Distances: ' . implode(', ', $distanceMessage)
         ], 400);
       }
     }
@@ -63,7 +77,7 @@ class AttendanceController extends Controller
     ]);
 
     return response()->json([
-      'message' => 'Marked in successfully at location: ' . $location->alias,
+      'message' => 'Marked in successfully',
       'distanceKm' => round($distanceKm, 3),
       'attendance' => $attendance,
     ]);
@@ -101,29 +115,41 @@ class AttendanceController extends Controller
     }
 
     // Get assigned mark-in location (with alias and lat/lng)
-    $employeeData = Employee::with('markOutLocation')->find($employee->id);
+    $employeeData = Employee::with('markOutLocations')->find($employee->id);
 
     // Get user current coordinates from mobile device
     $userLat = floatval($request->latitude);
     $userLng = floatval($request->longitude);
+    $allowedRadiusKm = env('COVERAGE_RADIUS') / 100;
 
-    if ($employeeData && $employeeData->markOutLocation) {
+// If user has assigned mark-in locations
+    if ($employeeData && $employeeData->markOutLocations->count()) {
 
-      $location = $employeeData->markOutLocation;
+      $withinRange = false;
+      $distanceMessage = [];
 
-      // Get assigned location coordinates
-      $locLat = floatval($location->latitude);
-      $locLng = floatval($location->longitude);
+      foreach ($employeeData->markOutLocations as $location) {
 
-      // Calculate distance using Haversine formula
-      $distanceKm = $this->haversineKm($userLat, $userLng, $locLat, $locLng);
+        $locLat = floatval($location->latitude);
+        $locLng = floatval($location->longitude);
 
-      // Define radius (in km)
-      $allowedRadiusKm = env('COVERAGE_RADIUS') / 100;
+        // Calculate distance
+        $distanceKm = $this->haversineKm($userLat, $userLng, $locLat, $locLng);
 
-      if ($distanceKm > $allowedRadiusKm) {
+        // Collect distances to show if needed
+        $distanceMessage[] = $location->alias . ': ' . round($distanceKm * 1000) . 'm';
+
+        // If within allowed radius → success
+        if ($distanceKm <= $allowedRadiusKm) {
+          $withinRange = true;
+          break;
+        }
+      }
+
+      // If NOT within range of ANY location
+      if (!$withinRange) {
         return response()->json([
-          'error' => 'You are too far from the mark-out location (' . round($distanceKm * 1000) . ' meters away).',
+          'error' => 'You are too far from all mark-out locations. Distances: ' . implode(', ', $distanceMessage)
         ], 400);
       }
     }
