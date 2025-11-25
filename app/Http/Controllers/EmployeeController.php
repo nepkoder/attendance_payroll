@@ -569,9 +569,9 @@ class EmployeeController extends Controller
       $userLat = floatval($request->latitude);
       $userLng = floatval($request->longitude);
 
-      if ($employeeData && $employeeData->markInLocation) {
+      if ($employeeData && $employeeData->markInLocations) {
 
-        $location = $employeeData->markInLocation;
+        $location = $employeeData->markInLocations;
 
         // Get assigned location coordinates
         $locLat = floatval($location->latitude);
@@ -692,7 +692,7 @@ class EmployeeController extends Controller
 
   public function employeeProfile(Request $request)
   {
-    $employee = Employee::with(['markInLocation','markOutLocation'])->where('id', $request->id)->first();
+    $employee = Employee::with(['markInLocations','markOutLocations'])->where('id', $request->id)->first();
     return response()->json([
       'status' => 'success',
       'message' => 'Employee Profile Fetched',

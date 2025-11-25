@@ -22,12 +22,30 @@
 
         <div class="col-md-8">
           <table class="table table-borderless">
-            <tr><th>Username:</th><td>{{ $employee->username }}</td></tr>
-            <tr><th>Email:</th><td>{{ $employee->email }}</td></tr>
-            <tr><th>Phone:</th><td>{{ $employee->phone ?? '-' }}</td></tr>
-            <tr><th>Company / Department:</th><td>{{ $employee->company ?? '-' }} / {{ $employee->department ?? '-' }}</td></tr>
-            <tr><th>Address:</th><td>{{ $employee->address ?? '-' }}</td></tr>
-            <tr><th>Document No:</th><td>{{ $employee->document_no ?? '-' }}</td></tr>
+            <tr>
+              <th>Username:</th>
+              <td>{{ $employee->username }}</td>
+            </tr>
+            <tr>
+              <th>Email:</th>
+              <td>{{ $employee->email }}</td>
+            </tr>
+            <tr>
+              <th>Phone:</th>
+              <td>{{ $employee->phone ?? '-' }}</td>
+            </tr>
+            <tr>
+              <th>Company / Department:</th>
+              <td>{{ $employee->company ?? '-' }} / {{ $employee->department ?? '-' }}</td>
+            </tr>
+            <tr>
+              <th>Address:</th>
+              <td>{{ $employee->address ?? '-' }}</td>
+            </tr>
+            <tr>
+              <th>Document No:</th>
+              <td>{{ $employee->document_no ?? '-' }}</td>
+            </tr>
             <tr>
               <th>Document Image:</th>
               <td>
@@ -38,10 +56,22 @@
                 @endif
               </td>
             </tr>
-            <tr><th>Mark In Location:</th><td>{{ $employee->markInLocation?->alias ?? '-' }}</td></tr>
-            <tr><th>Mark Out Location:</th><td>{{ $employee->markOutLocation?->alias ?? '-' }}</td></tr>
-            <tr><th>Hourly Rate:</th><td>{{ $employee->hourly_rate ?? '0.00' }}</td></tr>
-            <tr><th>Remarks:</th><td>{{ $employee->remarks ?? '-' }}</td></tr>
+            <tr>
+              <th>Mark In Location:</th>
+              <td>{{ isset($employee->markInLocations) ? $employee->markInLocations->pluck('alias')->join(', ') : '' }}</td>
+            </tr>
+            <tr>
+              <th>Mark Out Location:</th>
+              <td>{{ isset($employee->markOutLocations) ? $employee->markOutLocations->pluck('alias')->join(', ') : '' }}</td>
+            </tr>
+            <tr>
+              <th>Hourly Rate:</th>
+              <td>{{ $employee->hourly_rate ?? '0.00' }}</td>
+            </tr>
+            <tr>
+              <th>Remarks:</th>
+              <td>{{ $employee->remarks ?? '-' }}</td>
+            </tr>
           </table>
         </div>
       </div>

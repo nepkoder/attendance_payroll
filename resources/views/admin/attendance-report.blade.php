@@ -72,8 +72,8 @@
               <td>{{ $att->hour ?? '0' }}</td>
               <td>£ {{ $att->hourly_rate ?? '0' }}</td>
               <td>£ {{ number_format($att->earning ?? '0',2) }}</td>
-              <td>{{ $att->employee->markInLocation?->alias ?? '-' }}</td>
-              <td>{{ $att->employee->markOutLocation?->alias ?? '-' }}</td>
+              <td>{{ isset($att->markInLocations) ? $att->markInLocations->pluck('alias')->join(', ') : '' }}</td>
+              <td>{{ isset($att->markOutLocations) ? $att->markOutLocations->pluck('alias')->join(', ') : '' }}</td>
             </tr>
           @empty
             <tr>
