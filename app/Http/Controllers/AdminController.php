@@ -169,7 +169,7 @@ class AdminController extends Controller
   {
     $view = $request->get('view', 'daily');
 
-    $attendances = Attendance::with(['employee','employee.markInLocation','employee.markOutLocation'])
+    $attendances = Attendance::with(['employee','employee.markInLocations','employee.markOutLocations'])
       ->when($view === 'daily', fn($q) => $q->whereDate('mark_in', Carbon::today()))
       ->when($view === 'weekly', fn($q) => $q->whereBetween('mark_in', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]))
       ->when($view === 'monthly', fn($q) => $q->whereMonth('mark_in', Carbon::now()->month))
