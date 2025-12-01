@@ -232,7 +232,7 @@ class AdminController extends Controller
       } else if ($pickup->drop) {
         $pickup->drop->image_urls = [];
       }
-      if($pickup->drop->employee) {
+      if($pickup->drop && $pickup->drop->employee) {
         $pickup->dropoffEmployee = $pickup->drop->employee->name;
       }
 
