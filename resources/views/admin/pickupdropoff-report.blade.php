@@ -33,9 +33,11 @@
             <th>Pickup Date</th>
             <th>Vehicle No</th>
             <th>Pickup Images</th>
+            <th>Pickup Employee</th>
             <th>Pickup Remarks</th>
             <th>Dropoff Date</th>
             <th>Dropoff Images</th>
+            <th>Dropoff Employee</th>
             <th>Dropoff Remarks</th>
           </tr>
           </thead>
@@ -70,6 +72,10 @@
                 @endif
               </td>
 
+              <td>
+                {{$pickup->pickupEmployee ?? '-'}}
+              </td>
+
               {{-- Pickup Remarks --}}
               <td class="p-3">
                 {{ $pickup->remarks ?? '-' }}
@@ -96,6 +102,10 @@
                 @else
                   -
                 @endif
+              </td>
+
+              <td>
+                {{$pickup->dropoffEmployee ?? '-'}}
               </td>
 
               {{-- Dropoff Remarks --}}

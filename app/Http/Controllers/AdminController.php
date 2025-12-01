@@ -201,7 +201,7 @@ class AdminController extends Controller
       : Carbon::today();
 
     // Query pickups with dropoff
-    $pickups = VehiclePickup::with('drop')
+    $pickups = VehiclePickup::with(['employee','drop.employee'])
       ->whereBetween('created_at', [
         $from->copy()->startOfDay(),
         $to->copy()->endOfDay()
@@ -220,6 +220,9 @@ class AdminController extends Controller
       } else {
         $pickup->image_urls = [];
       }
+      if($pickup->employee) {
+        $pickup->pickupEmployee = $pickup->employee->name;
+      }
 
       // Dropoff images
       if ($pickup->drop && is_array($pickup->drop->images)) {
@@ -228,6 +231,9 @@ class AdminController extends Controller
           ->toArray();
       } else if ($pickup->drop) {
         $pickup->drop->image_urls = [];
+      }
+      if($pickup->drop->employee) {
+        $pickup->dropoffEmployee = $pickup->drop->employee->name;
       }
 
       return $pickup;
